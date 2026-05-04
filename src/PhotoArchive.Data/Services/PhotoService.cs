@@ -30,4 +30,13 @@ public class PhotoService
             .Take(100)
             .ToListAsync();
     }
+    public async Task<List<Photo>> GetOnThisDayAsync(int month, int day)
+    {
+        return await _db.Photos
+            .Where(p => p.Month == month && p.Day == day)
+            .OrderByDescending(p => p.Year)
+            .ThenByDescending(p => p.TakenAt)
+            .Take(500)
+            .ToListAsync();
+    }
 }
