@@ -3,6 +3,7 @@
     <Project Path="src/PhotoArchive.Api/PhotoArchive.Api.csproj" />
     <Project Path="src/PhotoArchive.Core/PhotoArchive.Core.csproj" />
     <Project Path="src/PhotoArchive.Data/PhotoArchive.Data.csproj" />
+    <Project Path="src/PhotoArchive.Tools/PhotoArchive.Tools.csproj" />
   </Folder>
   <Folder Name="/src/PhotoArchive.Functions/">
     <Project Path="src/PhotoArchive.Functions/PhotoArchive_Functions.csproj" />

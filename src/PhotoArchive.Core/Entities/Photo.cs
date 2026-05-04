@@ -17,7 +17,7 @@ namespace PhotoArchive.Core.Entities
 
         public string OriginalUrl { get; set; } = default!;
         public string? ThumbUrl { get; set; }
-
+        public string? SourceMetadataJson { get; set; }
         public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }
