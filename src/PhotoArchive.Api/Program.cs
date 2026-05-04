@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PhotoArchive.Data;
 using PhotoArchive.Core.Entities;
+using PhotoArchive.Data.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,8 @@ builder.Services.AddDbContext<PhotoDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<PhotoService>();
 
 var app = builder.Build();
 
