@@ -27,7 +27,7 @@ public class PostsController : ControllerBase
     /// <param name="postId">The blog post identifier.</param>
     /// <returns>A <see cref="PostSummaryResponse"/>, or 404 if no photos are associated with the post.</returns>
     [HttpGet("/posts/{postId}")]
-    public async Task<IActionResult> GetPost(string postId)
+    public async Task<IActionResult> GetPostSummary(string postId)
     {
         var response = await _photoService.GetPostSummaryAsync(postId);
 
@@ -45,7 +45,7 @@ public class PostsController : ControllerBase
     /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
     /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items for the post.</returns>
     [HttpGet("/posts/{postId}/photos")]
-    public async Task<IActionResult> GetByPost(string postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+    public async Task<IActionResult> GetPostPhotos(string postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         var photos = await _photoService.GetByPostAsync(postId, page, pageSize);
         return Ok(photos);

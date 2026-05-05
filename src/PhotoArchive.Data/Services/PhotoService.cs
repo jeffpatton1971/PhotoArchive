@@ -75,6 +75,8 @@ public class PhotoService
     /// <summary>
     /// Returns a paged list of photos matching the supplied <paramref name="options"/>.
     /// All photo collection endpoints route through this method.
+    /// When filtering by gallery or post, photos are ordered by <c>SortIndex</c> then <c>TakenAt</c>
+    /// to preserve authored sequence. All other queries order by most-recent <c>TakenAt</c> first.
     /// </summary>
     /// <param name="options">The filter and pagination options.</param>
     /// <param name="path">The canonical URL path used for link generation (without pagination query params).</param>
@@ -82,7 +84,13 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetPhotosByQueryAsync(PhotoQueryOptions options, string path)
     {
         var query = BuildPhotoQuery(options);
-        return GetPagedPhotosAsync(query, path, options.Page, options.PageSize);
+
+        // Gallery and post collections preserve their authored sort order (SortIndex → TakenAt asc).
+        // All other archive queries return most-recent photos first (TakenAt desc → SortIndex asc).
+        var useAuthoredOrder = !string.IsNullOrWhiteSpace(options.Gallery)
+                            || !string.IsNullOrWhiteSpace(options.PostId);
+
+        return GetPagedPhotosAsync(query, path, options.Page, options.PageSize, useAuthoredOrder);
     }
 
     private static string BuildPagedHref(string path, int page, int pageSize)
@@ -95,7 +103,8 @@ public class PhotoService
         IQueryable<Photo> query,
         string path,
         int page,
-        int pageSize)
+        int pageSize,
+        bool useAuthoredOrder = false)
     {
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, 250);
@@ -103,9 +112,13 @@ public class PhotoService
         var totalCount = await query.CountAsync();
         var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-        var photos = await query
-            .OrderByDescending(p => p.TakenAt)
-            .ThenBy(p => p.SortIndex ?? int.MaxValue)
+        // Gallery and post collections use authored order (SortIndex → TakenAt asc).
+        // Archive and general queries use most-recent-first order (TakenAt desc → SortIndex asc).
+        var orderedQuery = useAuthoredOrder
+            ? query.OrderBy(p => p.SortIndex ?? int.MaxValue).ThenBy(p => p.TakenAt)
+            : query.OrderByDescending(p => p.TakenAt).ThenBy(p => p.SortIndex ?? int.MaxValue);
+
+        var photos = await orderedQuery
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

@@ -30,7 +30,7 @@ public class GalleriesController : ControllerBase
     /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
     /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items in the gallery.</returns>
     [HttpGet("/galleries/{gallery}/photos")]
-    public async Task<IActionResult> GetByGallery(string gallery, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+    public async Task<IActionResult> GetGalleryPhotos(string gallery, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         var photos = await _photoService.GetByGalleryAsync(gallery, page, pageSize);
         return Ok(photos);
