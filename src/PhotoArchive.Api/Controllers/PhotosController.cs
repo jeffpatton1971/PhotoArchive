@@ -1,6 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using PhotoArchive.Data;
 using PhotoArchive.Data.Services;
 
 namespace PhotoArchive.Api.Controllers;
@@ -9,12 +7,10 @@ namespace PhotoArchive.Api.Controllers;
 [Route("photos")]
 public class PhotosController : ControllerBase
 {
-    private readonly PhotoDbContext _db;
     private readonly PhotoService _photoService;
 
-    public PhotosController(PhotoDbContext db, PhotoService photoService)
+    public PhotosController(PhotoService photoService)
     {
-        _db = db;
         _photoService = photoService;
     }
 
@@ -51,12 +47,12 @@ public class PhotosController : ControllerBase
     [HttpGet("/photos/{slug}")]
     public async Task<IActionResult> GetBySlug(string slug)
     {
-        var photo = await _photoService.GetBySlugAsync(slug);
+        var response = await _photoService.GetPhotoDetailAsync(slug);
 
-        if (photo is null)
+        if (response is null)
             return NotFound();
 
-        return Ok(photo);
+        return Ok(response);
     }
 
     [HttpGet("/galleries/{gallery}/photos")]
@@ -71,5 +67,15 @@ public class PhotosController : ControllerBase
     {
         var photos = await _photoService.GetByPostAsync(postId);
         return Ok(photos);
+    }
+    [HttpGet("/posts/{postId}")]
+    public async Task<IActionResult> GetPost(string postId)
+    {
+        var response = await _photoService.GetPostSummaryAsync(postId);
+
+        if (response is null)
+            return NotFound();
+
+        return Ok(response);
     }
 }
