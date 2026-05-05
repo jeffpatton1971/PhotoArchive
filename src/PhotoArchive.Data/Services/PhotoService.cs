@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PhotoArchive.Core.Entities;
 using PhotoArchive.Core.Models;
+using PhotoArchive.Core.Mapping;
 
 namespace PhotoArchive.Data.Services;
 
@@ -13,23 +14,25 @@ public class PhotoService
         _db = db;
     }
 
-    public async Task<List<Photo>> GetPhotosAsync(int? year, int? month, int? day)
+    public async Task<List<PhotoDto>> GetPhotosAsync(int? year, int? month, int? day)
     {
         var query = _db.Photos.AsQueryable();
 
         if (year.HasValue)
-            query = query.Where(p => p.Year == year.Value);
+            query = query.Where(p => p.Year == year);
 
         if (month.HasValue)
-            query = query.Where(p => p.Month == month.Value);
+            query = query.Where(p => p.Month == month);
 
         if (day.HasValue)
-            query = query.Where(p => p.Day == day.Value);
+            query = query.Where(p => p.Day == day);
 
-        return await query
+        var photos = await query
             .OrderByDescending(p => p.TakenAt)
             .Take(100)
             .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
     public async Task<List<Photo>> GetOnThisDayAsync(int month, int day)
     {
@@ -62,5 +65,23 @@ public class PhotoService
                 })
                 .ToList()
         };
+    }
+    public async Task<List<PhotoDto>> GetByGalleryAsync(string gallery)
+    {
+        var photos = await _db.Photos
+            .Where(p => p.Gallery == gallery)
+            .OrderBy(p => p.SortIndex)
+            .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+    }
+    public async Task<List<PhotoDto>> GetByPostAsync(string postId)
+    {
+        var photos = await _db.Photos
+            .Where(p => p.PostId == postId)
+            .OrderBy(p => p.SortIndex)
+            .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
 }

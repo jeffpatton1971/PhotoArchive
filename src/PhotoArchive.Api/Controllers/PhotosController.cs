@@ -53,4 +53,16 @@ public class PhotosController : ControllerBase
 
         return Ok(photo);
     }
+    [HttpGet("/galleries/{gallery}/photos")]
+    public async Task<IActionResult> GetByGallery(string gallery)
+    {
+        var photos = await _photoService.GetByGalleryAsync(gallery);
+        return Ok(photos);
+    }
+    [HttpGet("/posts/{postId}/photos")]
+    public async Task<IActionResult> GetByPost(string postId)
+    {
+        var photos = await _photoService.GetByPostAsync(postId);
+        return Ok(photos);
+    }
 }
