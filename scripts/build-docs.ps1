@@ -35,7 +35,9 @@ foreach ($proj in $projects) {
         continue
     }
 
-    $output = Join-Path $generatedRoot "$proj.md"
+    $projectOutputDir = Join-Path $generatedRoot $proj
+    New-Item -ItemType Directory -Force -Path $projectOutputDir | Out-Null
+    $output = Join-Path $projectOutputDir "$proj.md"
 
     Write-Host "Generating docs for $proj -> $output"
 
