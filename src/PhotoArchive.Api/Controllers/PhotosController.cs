@@ -15,17 +15,17 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet]
-    [HttpGet]
     public async Task<IActionResult> GetPhotos(
-    [FromQuery] int? year,
-    [FromQuery] int? month,
-    [FromQuery] int? day,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 50)
+        [FromQuery] int? year,
+        [FromQuery] int? month,
+        [FromQuery] int? day,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50)
     {
         var photos = await _photoService.GetPhotosAsync(year, month, day, page, pageSize);
         return Ok(photos);
     }
+
     [HttpGet("/on-this-day")]
     public async Task<IActionResult> GetOnThisDay([FromQuery] int? month, [FromQuery] int? day)
     {

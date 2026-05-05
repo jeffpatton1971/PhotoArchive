@@ -14,12 +14,75 @@ public class PhotoService
         _db = db;
     }
 
-    public async Task<List<PhotoDto>> GetPhotosAsync(
-        int? year,
-        int? month,
-        int? day,
-        int page = 1,
-        int pageSize = 50)
+    private static string BuildPhotoQueryString(int? year, int? month, int? day, int pageSize)
+    {
+        var parameters = new List<string>();
+
+        if (year.HasValue)
+            parameters.Add($"year={year.Value}");
+
+        if (month.HasValue)
+            parameters.Add($"month={month.Value}");
+
+        if (day.HasValue)
+            parameters.Add($"day={day.Value}");
+
+        parameters.Add($"pageSize={pageSize}");
+
+        return "?" + string.Join("&", parameters);
+    }
+
+    private async Task<PagedResponse<PhotoDto>> GetPagedPhotosAsync(
+        IQueryable<Photo> query,
+        string path,
+        int page,
+        int pageSize)
+    {
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 250);
+
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        var photos = await query
+            .OrderByDescending(p => p.TakenAt)
+            .ThenBy(p => p.SortIndex ?? int.MaxValue)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = new() { Href = $"{path}?page={page}&pageSize={pageSize}" },
+            ["first"] = new() { Href = $"{path}?page=1&pageSize={pageSize}" }
+        };
+
+        if (page > 1)
+            links["previous"] = new() { Href = $"{path}?page={page - 1}&pageSize={pageSize}" };
+
+        if (page < totalPages)
+            links["next"] = new() { Href = $"{path}?page={page + 1}&pageSize={pageSize}" };
+
+        if (totalPages > 0)
+            links["last"] = new() { Href = $"{path}?page={totalPages}&pageSize={pageSize}" };
+
+        return new PagedResponse<PhotoDto>
+        {
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            Items = photos.Select(PhotoDtoMapper.ToDto).ToList(),
+            Links = links
+        };
+    }
+
+    public async Task<PagedResponse<PhotoDto>> GetPhotosAsync(
+    int? year,
+    int? month,
+    int? day,
+    int page = 1,
+    int pageSize = 50)
     {
         page = Math.Max(page, 1);
         pageSize = Math.Clamp(pageSize, 1, 250);
@@ -35,13 +98,47 @@ public class PhotoService
         if (day.HasValue)
             query = query.Where(p => p.Day == day.Value);
 
+        var totalCount = await query.CountAsync();
+        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
         var photos = await query
             .OrderByDescending(p => p.TakenAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
 
-        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+        var queryString = BuildPhotoQueryString(year, month, day, pageSize);
+
+        var links = new Dictionary<string, ApiLink>
+        {
+            ["self"] = new() { Href = $"/photos{queryString}&page={page}" },
+            ["first"] = new() { Href = $"/photos{queryString}&page=1" }
+        };
+
+        if (page > 1)
+        {
+            links["previous"] = new() { Href = $"/photos{queryString}&page={page - 1}" };
+        }
+
+        if (page < totalPages)
+        {
+            links["next"] = new() { Href = $"/photos{queryString}&page={page + 1}" };
+        }
+
+        if (totalPages > 0)
+        {
+            links["last"] = new() { Href = $"/photos{queryString}&page={totalPages}" };
+        }
+
+        return new PagedResponse<PhotoDto>
+        {
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount,
+            TotalPages = totalPages,
+            Items = photos.Select(PhotoDtoMapper.ToDto).ToList(),
+            Links = links
+        };
     }
 
     public async Task<PhotoDetailResponse?> GetPhotoDetailAsync(string slug)
@@ -403,5 +500,22 @@ public class PhotoService
             .ToListAsync();
 
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
+    }
+    public Task<PagedResponse<PhotoDto>> GetPhotosByYearAsync(int year, int page, int pageSize)
+    {
+        var query = _db.Photos.Where(p => p.Year == year);
+        return GetPagedPhotosAsync(query, $"/years/{year}/photos", page, pageSize);
+    }
+
+    public Task<PagedResponse<PhotoDto>> GetPhotosByMonthAsync(int year, int month, int page, int pageSize)
+    {
+        var query = _db.Photos.Where(p => p.Year == year && p.Month == month);
+        return GetPagedPhotosAsync(query, $"/years/{year}/months/{month}/photos", page, pageSize);
+    }
+
+    public Task<PagedResponse<PhotoDto>> GetPhotosByDayAsync(int year, int month, int day, int page, int pageSize)
+    {
+        var query = _db.Photos.Where(p => p.Year == year && p.Month == month && p.Day == day);
+        return GetPagedPhotosAsync(query, $"/years/{year}/months/{month}/days/{day}/photos", page, pageSize);
     }
 }

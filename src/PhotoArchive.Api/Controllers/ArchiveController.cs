@@ -32,6 +32,13 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("/years/{year:int}/photos")]
+    public async Task<IActionResult> GetPhotosForYear(int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+    {
+        var response = await _photoService.GetPhotosByYearAsync(year, page, pageSize);
+        return Ok(response);
+    }
+
     [HttpGet("/years/{year:int}/months")]
     public async Task<IActionResult> GetMonths(int year)
     {
@@ -50,6 +57,16 @@ public class ArchiveController : ControllerBase
         if (response is null)
             return NotFound();
 
+        return Ok(response);
+    }
+
+    [HttpGet("/years/{year:int}/months/{month:int}/photos")]
+    public async Task<IActionResult> GetPhotosForMonth(int year, int month, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
+    {
+        if (month < 1 || month > 12)
+            return BadRequest("Month must be between 1 and 12.");
+
+        var response = await _photoService.GetPhotosByMonthAsync(year, month, page, pageSize);
         return Ok(response);
     }
 
@@ -92,7 +109,7 @@ public class ArchiveController : ControllerBase
     }
 
     [HttpGet("/years/{year:int}/months/{month:int}/days/{day:int}/photos")]
-    public async Task<IActionResult> GetPhotosForDay(int year, int month, int day)
+    public async Task<IActionResult> GetPhotosForDay(int year, int month, int day, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         if (month < 1 || month > 12)
             return BadRequest("Month must be between 1 and 12.");
@@ -100,15 +117,7 @@ public class ArchiveController : ControllerBase
         if (day < 1 || day > 31)
             return BadRequest("Day must be between 1 and 31.");
 
-        var photos = await _photoService.GetPhotosByDateAsync(year, month, day);
-
-        return Ok(new
-        {
-            year,
-            month,
-            day,
-            count = photos.Count,
-            photos
-        });
+        var response = await _photoService.GetPhotosByDayAsync(year, month, day, page, pageSize);
+        return Ok(response);
     }
 }
