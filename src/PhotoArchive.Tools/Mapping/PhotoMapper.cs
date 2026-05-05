@@ -28,7 +28,7 @@ public static class PhotoMapper
             OriginalUrl = GetString(data, "raw_url") ?? "",
             ThumbUrl = GetString(data, "thumb_url"),
 
-            // 👇 ADD THEM HERE
+            // ADD THEM HERE
             Gallery = GetString(data, "gallery"),
             PostUrl = GetString(data, "post"),
             PostId = GetString(data, "post_id"),
@@ -89,10 +89,12 @@ public static class PhotoMapper
             return null;
 
         if (value is DateTime dateTime)
-            return new DateTimeOffset(dateTime);
-
+        {
+            var unspecified = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+            return new DateTimeOffset(unspecified);
+        }
         return DateTimeOffset.TryParse(value.ToString(), out var parsed)
-            ? parsed
+            ? parsed.ToUniversalTime()
             : null;
     }
 }

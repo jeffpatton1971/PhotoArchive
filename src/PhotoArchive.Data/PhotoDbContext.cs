@@ -25,6 +25,11 @@ namespace PhotoArchive.Data
 
                 entity.Property(x => x.Source).IsRequired();
                 entity.Property(x => x.OriginalUrl).IsRequired();
+
+                entity.HasIndex(x => x.TakenAt);
+                entity.HasIndex(x => x.Gallery);
+                entity.HasIndex(x => x.PostId);
+                entity.HasIndex(x => x.Source);
             });
         }
     }

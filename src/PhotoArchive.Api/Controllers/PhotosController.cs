@@ -51,4 +51,15 @@ public class PhotosController : ControllerBase
             photos
         });
     }
+    [HttpGet("/photos/{slug}")]
+    public async Task<IActionResult> GetBySlug(string slug)
+    {
+        var photo = await _db.Photos
+            .FirstOrDefaultAsync(p => p.Slug == slug);
+
+        if (photo == null)
+            return NotFound();
+
+        return Ok(photo);
+    }
 }

@@ -1,4 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using PhotoArchive.Core.Entities;
+using PhotoArchive.Data;
 
 public static class ImportJekyllGalleryCommand
 {
@@ -17,7 +21,7 @@ public static class ImportJekyllGalleryCommand
             Console.WriteLine(@"  import-jekyll-gallery ""C:\code\projects\kansaspattons\_gallery"" --dry-run");
             return;
         }
-        
+
         var files = Directory.GetFiles(path, "*.md", SearchOption.AllDirectories);
 
         Console.WriteLine($"Files found: {files.Length}");
@@ -26,6 +30,33 @@ public static class ImportJekyllGalleryCommand
         int processed = 0;
         int valid = 0;
         int invalid = 0;
+        int imported = 0;
+        int skipped = 0;
+
+        PhotoDbContext? db = null;
+
+        if (!dryRun)
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddUserSecrets<Program>()
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("Default");
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                Console.WriteLine("ERROR: Missing ConnectionStrings:Default user-secret.");
+                return;
+            }
+
+            var services = new ServiceCollection();
+
+            services.AddDbContext<PhotoDbContext>(options =>
+                options.UseNpgsql(connectionString));
+
+            var provider = services.BuildServiceProvider();
+            db = provider.GetRequiredService<PhotoDbContext>();
+        }
 
         foreach (var file in files)
         {
@@ -44,29 +75,57 @@ public static class ImportJekyllGalleryCommand
                     invalid++;
                     Console.WriteLine();
                     Console.WriteLine($"INVALID: {Path.GetFileName(file)}");
+
                     foreach (var error in errors)
-                    {
                         Console.WriteLine($"  - {error}");
-                    }
 
                     continue;
                 }
 
                 valid++;
 
-                if (dryRun && valid <= 25)
+                if (dryRun)
                 {
-                    Console.WriteLine($"VALID: {photo.Slug} | {photo.TakenAt:yyyy-MM-dd} | {photo.Source}");
+                    if (valid <= 25)
+                        Console.WriteLine($"VALID: {photo.Slug} | {photo.TakenAt:yyyy-MM-dd} | {photo.Source}");
+
+                    continue;
+                }
+
+                var exists = await db!.Photos.AnyAsync(p => p.Slug == photo.Slug);
+
+                if (exists)
+                {
+                    skipped++;
+                    continue;
+                }
+
+                db.Photos.Add(photo);
+                imported++;
+
+                if (imported % 500 == 0)
+                {
+                    await db.SaveChangesAsync();
+                    Console.WriteLine($"Imported {imported} photos...");
                 }
             }
             catch (Exception ex)
             {
                 invalid++;
+
                 Console.WriteLine();
                 Console.WriteLine($"ERROR: {Path.GetFileName(file)}");
                 Console.WriteLine($"  - {ex.Message}");
+
+                if (ex.InnerException is not null)
+                {
+                    Console.WriteLine($"  - Inner: {ex.InnerException.Message}");
+                }
             }
         }
+
+        if (!dryRun && db is not null)
+            await db.SaveChangesAsync();
 
         Console.WriteLine();
         Console.WriteLine("Summary");
@@ -74,8 +133,9 @@ public static class ImportJekyllGalleryCommand
         Console.WriteLine($"Processed: {processed}");
         Console.WriteLine($"Valid:     {valid}");
         Console.WriteLine($"Invalid:   {invalid}");
+        Console.WriteLine($"Imported:  {imported}");
+        Console.WriteLine($"Skipped:   {skipped}");
     }
-
     private static IEnumerable<string> Validate(Photo photo)
     {
         if (string.IsNullOrWhiteSpace(photo.Slug))
