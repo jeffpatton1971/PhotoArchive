@@ -42,6 +42,10 @@ foreach ($proj in $projects) {
     Write-Host "Generating docs for $proj -> $output"
 
     dotnet tool run xml2doc -- `
+    $output = Join-Path $generatedRoot "$proj.md"
+
+    Write-Host "Generating docs for $proj -> $output"
+    Xml2Doc.Cli `
         --xml "$($xmlPath.FullName)" `
         --out "$output" `
         --single `
