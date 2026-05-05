@@ -4,8 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 using PhotoArchive.Core.Entities;
 using PhotoArchive.Data;
 
+/// <summary>
+/// Imports photos from a Jekyll gallery directory into the PhotoArchive database.
+/// </summary>
 public static class ImportJekyllGalleryCommand
 {
+    /// <summary>
+    /// Reads all <c>*.md</c> files under <paramref name="path"/>, validates their front matter,
+    /// and imports new photos into the database. When <paramref name="dryRun"/> is <see langword="true"/>
+    /// the database is not modified and a preview of valid records is printed instead.
+    /// </summary>
+    /// <param name="path">The root directory containing Jekyll gallery Markdown files.</param>
+    /// <param name="dryRun">
+    /// When <see langword="true"/>, performs validation and preview only without writing to the database.
+    /// </param>
     public static async Task Run(string path, bool dryRun)
     {
         if (string.IsNullOrWhiteSpace(path))

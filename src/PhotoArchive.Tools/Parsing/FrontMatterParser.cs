@@ -1,7 +1,19 @@
 using YamlDotNet.Serialization;
 
+/// <summary>
+/// Parses YAML front matter from Jekyll-style Markdown files.
+/// </summary>
 public static class FrontMatterParser
 {
+    /// <summary>
+    /// Parses the YAML front matter block from the supplied Markdown <paramref name="content"/>.
+    /// The front matter is expected to be the first section delimited by <c>---</c>.
+    /// </summary>
+    /// <param name="content">The full text of a Markdown file.</param>
+    /// <returns>
+    /// A dictionary of key/value pairs parsed from the YAML front matter,
+    /// or an empty dictionary if no front matter is present.
+    /// </returns>
     public static Dictionary<string, object> Parse(string content)
     {
         var parts = content.Split("---", StringSplitOptions.RemoveEmptyEntries);
