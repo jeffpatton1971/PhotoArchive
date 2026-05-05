@@ -19,13 +19,9 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPhotos()
+    public async Task<IActionResult> GetPhotos([FromQuery] int? year, [FromQuery] int? month, [FromQuery] int? day)
     {
-        var photos = await _db.Photos
-            .OrderByDescending(p => p.TakenAt)
-            .Take(50)
-            .ToListAsync();
-
+        var photos = await _photoService.GetPhotosAsync(year, month, day);
         return Ok(photos);
     }
     [HttpGet("/on-this-day")]
