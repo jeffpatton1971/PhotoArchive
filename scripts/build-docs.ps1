@@ -35,7 +35,7 @@ foreach ($proj in $projects) {
     $output = Join-Path $generatedRoot "$proj.md"
 
     Write-Host "Generating docs for $proj -> $output"
-    xml2doc `
+    Xml2Doc.Cli `
         --xml "$($xmlPath.FullName)" `
         --out "$output" `
         --single `
