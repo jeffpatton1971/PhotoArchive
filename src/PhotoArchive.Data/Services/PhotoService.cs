@@ -14,7 +14,7 @@ public class PhotoService
         _db = db;
     }
 
-    private static string BuildPhotoQueryString(int? year, int? month, int? day, int pageSize)
+    private static string BuildPhotoPath(int? year, int? month, int? day)
     {
         var parameters = new List<string>();
 
@@ -27,9 +27,16 @@ public class PhotoService
         if (day.HasValue)
             parameters.Add($"day={day.Value}");
 
-        parameters.Add($"pageSize={pageSize}");
+        if (parameters.Count == 0)
+            return "/photos";
 
-        return "?" + string.Join("&", parameters);
+        return "/photos?" + string.Join("&", parameters);
+    }
+
+    private static string BuildPagedHref(string path, int page, int pageSize)
+    {
+        var separator = path.Contains('?') ? '&' : '?';
+        return $"{path}{separator}page={page}&pageSize={pageSize}";
     }
 
     private async Task<PagedResponse<PhotoDto>> GetPagedPhotosAsync(
@@ -53,18 +60,18 @@ public class PhotoService
 
         var links = new Dictionary<string, ApiLink>
         {
-            ["self"] = new() { Href = $"{path}?page={page}&pageSize={pageSize}" },
-            ["first"] = new() { Href = $"{path}?page=1&pageSize={pageSize}" }
+            ["self"] = new() { Href = BuildPagedHref(path, page, pageSize) },
+            ["first"] = new() { Href = BuildPagedHref(path, 1, pageSize) }
         };
 
         if (page > 1)
-            links["previous"] = new() { Href = $"{path}?page={page - 1}&pageSize={pageSize}" };
+            links["previous"] = new() { Href = BuildPagedHref(path, page - 1, pageSize) };
 
         if (page < totalPages)
-            links["next"] = new() { Href = $"{path}?page={page + 1}&pageSize={pageSize}" };
+            links["next"] = new() { Href = BuildPagedHref(path, page + 1, pageSize) };
 
         if (totalPages > 0)
-            links["last"] = new() { Href = $"{path}?page={totalPages}&pageSize={pageSize}" };
+            links["last"] = new() { Href = BuildPagedHref(path, totalPages, pageSize) };
 
         return new PagedResponse<PhotoDto>
         {
@@ -78,15 +85,12 @@ public class PhotoService
     }
 
     public async Task<PagedResponse<PhotoDto>> GetPhotosAsync(
-    int? year,
-    int? month,
-    int? day,
-    int page = 1,
-    int pageSize = 50)
+        int? year,
+        int? month,
+        int? day,
+        int page = 1,
+        int pageSize = 50)
     {
-        page = Math.Max(page, 1);
-        pageSize = Math.Clamp(pageSize, 1, 250);
-
         var query = _db.Photos.AsQueryable();
 
         if (year.HasValue)
@@ -98,47 +102,7 @@ public class PhotoService
         if (day.HasValue)
             query = query.Where(p => p.Day == day.Value);
 
-        var totalCount = await query.CountAsync();
-        var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
-
-        var photos = await query
-            .OrderByDescending(p => p.TakenAt)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        var queryString = BuildPhotoQueryString(year, month, day, pageSize);
-
-        var links = new Dictionary<string, ApiLink>
-        {
-            ["self"] = new() { Href = $"/photos{queryString}&page={page}" },
-            ["first"] = new() { Href = $"/photos{queryString}&page=1" }
-        };
-
-        if (page > 1)
-        {
-            links["previous"] = new() { Href = $"/photos{queryString}&page={page - 1}" };
-        }
-
-        if (page < totalPages)
-        {
-            links["next"] = new() { Href = $"/photos{queryString}&page={page + 1}" };
-        }
-
-        if (totalPages > 0)
-        {
-            links["last"] = new() { Href = $"/photos{queryString}&page={totalPages}" };
-        }
-
-        return new PagedResponse<PhotoDto>
-        {
-            Page = page,
-            PageSize = pageSize,
-            TotalCount = totalCount,
-            TotalPages = totalPages,
-            Items = photos.Select(PhotoDtoMapper.ToDto).ToList(),
-            Links = links
-        };
+        return await GetPagedPhotosAsync(query, BuildPhotoPath(year, month, day), page, pageSize);
     }
 
     public async Task<PhotoDetailResponse?> GetPhotoDetailAsync(string slug)
@@ -314,7 +278,8 @@ public class PhotoService
             Links = new Dictionary<string, ApiLink>
             {
                 ["months"] = new() { Href = $"/years/{x.Year}/months" },
-                ["photos"] = new() { Href = $"/photos?year={x.Year}" }
+                ["photos"] = new() { Href = $"/years/{x.Year}/photos" },
+                ["query"] = new() { Href = $"/photos?year={x.Year}" }
             }
         }).ToList();
     }
@@ -341,6 +306,10 @@ public class PhotoService
                     Href = $"/years/{year}/months"
                 },
                 ["photos"] = new()
+                {
+                    Href = $"/years/{year}/photos"
+                },
+                ["query"] = new()
                 {
                     Href = $"/photos?year={year}"
                 }
@@ -377,6 +346,10 @@ public class PhotoService
                 },
                 ["photos"] = new()
                 {
+                    Href = $"/years/{year}/months/{x.Month}/photos"
+                },
+                ["query"] = new()
+                {
                     Href = $"/photos?year={year}&month={x.Month}"
                 }
             }
@@ -407,6 +380,10 @@ public class PhotoService
                     Href = $"/years/{year}/months/{month}/days"
                 },
                 ["photos"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/photos"
+                },
+                ["query"] = new()
                 {
                     Href = $"/photos?year={year}&month={month}"
                 }

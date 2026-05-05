@@ -85,7 +85,8 @@ public class ArchiveController : ControllerBase
             links = new Dictionary<string, ApiLink>
             {
                 ["self"] = new() { Href = $"/years/{year}/months/{month}/days" },
-                ["photos"] = new() { Href = $"/photos?year={year}&month={month}" }
+                ["photos"] = new() { Href = $"/years/{year}/months/{month}/photos" },
+                ["query"] = new() { Href = $"/photos?year={year}&month={month}" }
             },
             days
         });

@@ -170,9 +170,9 @@ Stores:
 
 ```text
 User opens /photos/2026/05/01
-Frontend calls GET /photos?year=2026&month=5&day=1
+Frontend calls GET /years/2026/months/5/days/1/photos or GET /photos?year=2026&month=5&day=1
 API queries PostgreSQL
-API returns photo metadata and Blob URLs
+API returns PagedResponse<PhotoDto> with navigation links and Blob URLs
 Frontend renders thumbnails
 Browser loads images from Azure Blob Storage
 ```
@@ -305,6 +305,19 @@ Initial ADRs:
 - 0004-use-postgresql-for-metadata.md
 - 0005-use-azure-blob-storage-for-images.md
 - 0006-use-azure-functions-for-background-processing.md
+
+### Consistent Photo Collection Pagination
+
+All primary photo collection endpoints return `PagedResponse<PhotoDto>` with `page`, `pageSize`, `totalCount`, `totalPages`, `items`, and pagination `links`.
+
+This applies to:
+
+- `GET /photos`
+- `GET /years/{year}/photos`
+- `GET /years/{year}/months/{month}/photos`
+- `GET /years/{year}/months/{month}/days/{day}/photos`
+
+Pagination is centralized in `PhotoService.GetPagedPhotosAsync(...)`. Flexible query routes such as `/photos?year=&month=&day=` and archive routes such as `/years/{year}/months/{month}/photos` share the same paging, ordering, DTO mapping, and link generation behavior.
 
 ---
 
