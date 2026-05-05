@@ -17,6 +17,9 @@ $projects = @(
     "PhotoArchive.Tools"
 )
 
+$generatedRoot = "docs/PhotoArchive/generated"
+New-Item -ItemType Directory -Force -Path $generatedRoot | Out-Null
+
 foreach ($proj in $projects) {
     Write-Host "Processing $proj..."
 
@@ -27,10 +30,9 @@ foreach ($proj in $projects) {
         continue
     }
 
-    $output = "docs/PhotoArchive/generated/$proj"
-    New-Item -ItemType Directory -Force -Path $output | Out-Null
+    $output = Join-Path $generatedRoot "$proj.md"
 
-    Write-Host "Generating docs for $proj"
+    Write-Host "Generating docs for $proj -> $output"
     xml2doc --input "$($xmlPath.FullName)" --output "$output"
 }
 
