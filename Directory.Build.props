@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'PhotoArchive.Api' Or '$(MSBuildProjectName)' == 'PhotoArchive.Core' Or '$(MSBuildProjectName)' == 'PhotoArchive.Data' Or '$(MSBuildProjectName)' == 'PhotoArchive.Tools'">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+</Project>
