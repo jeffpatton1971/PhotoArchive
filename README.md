@@ -1,16 +1,41 @@
 # PhotoArchive
 
-## Current State
+## Current Status
 
-- ASP.NET Core API running
-- PostgreSQL (Docker) connected
-- EF Core migrations working
-- /photos endpoint implemented
-- Local secrets managed via user-secrets
-- Add photo service, filtering, and on-this-day endpoint
-- Introduce PhotoService for query logic
-- Add filtering to GET /photos (year/month/day)
-- Add GET /on-this-day endpoint (supports today + query params)
-- Wire up EF Core with PostgreSQL (Docker)
-- Use user-secrets for local connection string
-  
+The PhotoArchive project now includes a working backend API and full data import pipeline.
+
+### Features
+
+- ASP.NET Core API
+- PostgreSQL database (Docker)
+- EF Core migrations
+- Photo import from Jekyll `_gallery` markdown
+- 8,500+ photos successfully imported
+- Idempotent importer (safe to re-run)
+
+### API Endpoints
+
+- `GET /photos`
+- `GET /photos/{slug}`
+- `GET /on-this-day`
+- `GET /on-this-day?month={m}&day={d}`
+
+### Data Model
+
+Each photo includes:
+
+- Slug (unique)
+- Title
+- TakenAt / Year / Month / Day
+- OriginalUrl / ThumbUrl
+- Source
+- Gallery / PostUrl / PostId / SortIndex
+- Raw source metadata (JSON)
+
+### Import
+
+Run importer:
+
+```bash
+dotnet run --project src/PhotoArchive.Tools -- import-jekyll-gallery "<path>" --dry-run
+dotnet run --project src/PhotoArchive.Tools -- import-jekyll-gallery "<path>"
