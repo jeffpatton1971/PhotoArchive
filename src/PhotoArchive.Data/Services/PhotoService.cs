@@ -183,6 +183,7 @@ public class PhotoService
             Links = links
         };
     }
+
     /// <summary>
     /// Returns a summary for a blog post identified by <paramref name="postId"/>, or <see langword="null"/> if no photos are associated.
     /// </summary>
@@ -218,6 +219,7 @@ public class PhotoService
             }
         };
     }
+
     /// <summary>
     /// Returns the <see cref="PhotoDto"/> for the photo with the given slug, or <see langword="null"/> if not found.
     /// </summary>
@@ -311,6 +313,7 @@ public class PhotoService
                 .ToList()
         };
     }
+
     /// <summary>
     /// Returns the list of years that have at least one photo in the archive.
     /// </summary>
@@ -340,6 +343,7 @@ public class PhotoService
             }
         }).ToList();
     }
+
     /// <summary>
     /// Returns the detail for the given year, including its months and navigation links, or <see langword="null"/> if no photos exist for that year.
     /// </summary>
@@ -378,6 +382,7 @@ public class PhotoService
             }
         };
     }
+
     /// <summary>
     /// Returns the list of months within the given year that have at least one photo.
     /// </summary>
@@ -509,6 +514,7 @@ public class PhotoService
             }
         }).ToList();
     }
+
     /// <summary>
     /// Returns the detail for a specific year/month/day, or <see langword="null"/> if no photos exist on that date.
     /// </summary>
@@ -554,6 +560,7 @@ public class PhotoService
             }
         };
     }
+
     /// <summary>
     /// Returns all photos taken on a specific date, ordered by sort index then taken time.
     /// </summary>
