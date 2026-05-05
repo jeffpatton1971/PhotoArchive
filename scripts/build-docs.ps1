@@ -2,6 +2,8 @@ param(
     [string]$Configuration = "Debug"
 )
 
+$ErrorActionPreference = "Stop"
+
 Write-Host "Building solution..."
 dotnet clean
 dotnet restore
@@ -17,21 +19,34 @@ $projects = @(
     "PhotoArchive.Tools"
 )
 
+$generatedRoot = "docs/PhotoArchive/generated"
+New-Item -ItemType Directory -Force -Path $generatedRoot | Out-Null
+
 foreach ($proj in $projects) {
     Write-Host "Processing $proj..."
 
-    $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Select-Object -First 1
+    $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Where-Object {
+        $_.FullName -like "*bin*$Configuration*"
+    } | Select-Object -First 1
+
+    if (-not $xmlPath) {
+        $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Select-Object -First 1
+    }
 
     if (-not $xmlPath) {
         Write-Warning "No XML doc found for $proj"
         continue
     }
 
-    $output = "docs/PhotoArchive/generated/$proj"
-    New-Item -ItemType Directory -Force -Path $output | Out-Null
+    $output = Join-Path $generatedRoot "$proj.md"
 
-    Write-Host "Generating docs for $proj"
-    xml2doc --input "$($xmlPath.FullName)" --output "$output"
+    Write-Host "Generating docs for $proj -> $output"
+
+    dotnet tool run xml2doc -- `
+        --xml "$($xmlPath.FullName)" `
+        --out "$output" `
+        --single `
+        --file-names clean
 }
 
 Write-Host "Documentation generation complete."
