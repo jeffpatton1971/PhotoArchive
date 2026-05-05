@@ -5,17 +5,20 @@ namespace PhotoArchive.Core.Mapping;
 
 public static class PhotoDtoMapper
 {
-    public static PhotoDto ToDto(Photo p) => new()
+    public static PhotoDto ToDto(Photo photo) => new()
     {
-        Slug = p.Slug,
-        Title = p.Title,
-        Year = p.Year,
-        Month = p.Month,
-        Day = p.Day,
-        Gallery = p.Gallery,
-        PostUrl = p.PostUrl,
-        Source = p.Source,
-        OriginalUrl = p.OriginalUrl,
-        ThumbUrl = p.ThumbUrl
+        Slug = photo.Slug,
+        Title = photo.Title,
+        TakenAt = photo.TakenAt,
+        Year = photo.Year,
+        Month = photo.Month,
+        Day = photo.Day,
+        Gallery = photo.Gallery,
+        PostUrl = photo.PostUrl,
+        PostId = photo.PostId,
+        SortIndex = photo.SortIndex,
+        Source = photo.Source,
+        OriginalUrl = photo.OriginalUrl,
+        ThumbUrl = photo.ThumbUrl
     };
 }

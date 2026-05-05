@@ -1,5 +1,3 @@
-using PhotoArchive.Core.Entities;
-
 namespace PhotoArchive.Core.Models;
 
 public class OnThisDayResponse
@@ -12,5 +10,6 @@ public class OnThisDayResponse
 public class OnThisDayYearGroup
 {
     public int Year { get; set; }
-    public List<Photo> Photos { get; set; } = [];
+    public int Count => Photos.Count;
+    public List<PhotoDto> Photos { get; set; } = [];
 }

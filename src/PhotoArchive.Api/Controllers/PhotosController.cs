@@ -19,9 +19,15 @@ public class PhotosController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPhotos([FromQuery] int? year, [FromQuery] int? month, [FromQuery] int? day)
+    [HttpGet]
+    public async Task<IActionResult> GetPhotos(
+    [FromQuery] int? year,
+    [FromQuery] int? month,
+    [FromQuery] int? day,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 50)
     {
-        var photos = await _photoService.GetPhotosAsync(year, month, day);
+        var photos = await _photoService.GetPhotosAsync(year, month, day, page, pageSize);
         return Ok(photos);
     }
     [HttpGet("/on-this-day")]
@@ -45,20 +51,21 @@ public class PhotosController : ControllerBase
     [HttpGet("/photos/{slug}")]
     public async Task<IActionResult> GetBySlug(string slug)
     {
-        var photo = await _db.Photos
-            .FirstOrDefaultAsync(p => p.Slug == slug);
+        var photo = await _photoService.GetBySlugAsync(slug);
 
-        if (photo == null)
+        if (photo is null)
             return NotFound();
 
         return Ok(photo);
     }
+
     [HttpGet("/galleries/{gallery}/photos")]
     public async Task<IActionResult> GetByGallery(string gallery)
     {
         var photos = await _photoService.GetByGalleryAsync(gallery);
         return Ok(photos);
     }
+
     [HttpGet("/posts/{postId}/photos")]
     public async Task<IActionResult> GetByPost(string postId)
     {

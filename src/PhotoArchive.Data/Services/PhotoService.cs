@@ -14,7 +14,12 @@ public class PhotoService
         _db = db;
     }
 
-    public async Task<List<PhotoDto>> GetPhotosAsync(int? year, int? month, int? day)
+    public async Task<List<PhotoDto>> GetPhotosAsync(
+        int? year,
+        int? month,
+        int? day,
+        int page = 1,
+        int pageSize = 50)
     {
         var query = _db.Photos.AsQueryable();
 
@@ -27,22 +32,57 @@ public class PhotoService
         if (day.HasValue)
             query = query.Where(p => p.Day == day);
 
-        var photos = await query
+        return await query
             .OrderByDescending(p => p.TakenAt)
-            .Take(100)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => PhotoDtoMapper.ToDto(p))
+            .ToListAsync();
+    }
+
+    public async Task<PhotoDto?> GetBySlugAsync(string slug)
+    {
+        var photo = await _db.Photos
+            .FirstOrDefaultAsync(p => p.Slug == slug);
+
+        return photo is null ? null : PhotoDtoMapper.ToDto(photo);
+    }
+
+    public async Task<List<PhotoDto>> GetByGalleryAsync(string gallery)
+    {
+        var photos = await _db.Photos
+            .Where(p => p.Gallery == gallery)
+            .OrderBy(p => p.SortIndex ?? int.MaxValue)
+            .ThenBy(p => p.TakenAt)
             .ToListAsync();
 
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
-    public async Task<List<Photo>> GetOnThisDayAsync(int month, int day)
+
+    public async Task<List<PhotoDto>> GetByPostAsync(string postId)
     {
-        return await _db.Photos
+        var photos = await _db.Photos
+            .Where(p => p.PostId == postId)
+            .OrderBy(p => p.SortIndex ?? int.MaxValue)
+            .ThenBy(p => p.TakenAt)
+            .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+    }
+
+    public async Task<List<PhotoDto>> GetOnThisDayAsync(int month, int day)
+    {
+        var photos = await _db.Photos
             .Where(p => p.Month == month && p.Day == day)
             .OrderByDescending(p => p.Year)
-            .ThenByDescending(p => p.TakenAt)
+            .ThenBy(p => p.SortIndex ?? int.MaxValue)
+            .ThenBy(p => p.TakenAt)
             .Take(500)
             .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
+
     public async Task<OnThisDayResponse> GetOnThisDayGroupedAsync(int month, int day)
     {
         var photos = await GetOnThisDayAsync(month, day);
@@ -65,23 +105,5 @@ public class PhotoService
                 })
                 .ToList()
         };
-    }
-    public async Task<List<PhotoDto>> GetByGalleryAsync(string gallery)
-    {
-        var photos = await _db.Photos
-            .Where(p => p.Gallery == gallery)
-            .OrderBy(p => p.SortIndex)
-            .ToListAsync();
-
-        return photos.Select(PhotoDtoMapper.ToDto).ToList();
-    }
-    public async Task<List<PhotoDto>> GetByPostAsync(string postId)
-    {
-        var photos = await _db.Photos
-            .Where(p => p.PostId == postId)
-            .OrderBy(p => p.SortIndex)
-            .ToListAsync();
-
-        return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
 }
