@@ -38,14 +38,9 @@ public class PhotosController : ControllerBase
         if (targetDay < 1 || targetDay > 31)
             return BadRequest("Day must be between 1 and 31.");
 
-        var photos = await _photoService.GetOnThisDayAsync(targetMonth, targetDay);
+        var response = await _photoService.GetOnThisDayGroupedAsync(targetMonth, targetDay);
 
-        return Ok(new
-        {
-            month = targetMonth,
-            day = targetDay,
-            photos
-        });
+        return Ok(response);
     }
     [HttpGet("/photos/{slug}")]
     public async Task<IActionResult> GetBySlug(string slug)

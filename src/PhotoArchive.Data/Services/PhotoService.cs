@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PhotoArchive.Core.Entities;
+using PhotoArchive.Core.Models;
 
 namespace PhotoArchive.Data.Services;
 
@@ -38,5 +39,28 @@ public class PhotoService
             .ThenByDescending(p => p.TakenAt)
             .Take(500)
             .ToListAsync();
+    }
+    public async Task<OnThisDayResponse> GetOnThisDayGroupedAsync(int month, int day)
+    {
+        var photos = await GetOnThisDayAsync(month, day);
+
+        return new OnThisDayResponse
+        {
+            Month = month,
+            Day = day,
+            Years = photos
+                .Where(p => p.Year.HasValue)
+                .GroupBy(p => p.Year!.Value)
+                .OrderByDescending(g => g.Key)
+                .Select(g => new OnThisDayYearGroup
+                {
+                    Year = g.Key,
+                    Photos = g
+                        .OrderBy(p => p.SortIndex ?? int.MaxValue)
+                        .ThenBy(p => p.TakenAt)
+                        .ToList()
+                })
+                .ToList()
+        };
     }
 }
