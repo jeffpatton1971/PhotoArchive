@@ -3,8 +3,16 @@ using PhotoArchive.Core.Models;
 
 namespace PhotoArchive.Core.Mapping;
 
+/// <summary>
+/// Provides mapping from <see cref="Photo"/> entities to <see cref="PhotoDto"/> data transfer objects.
+/// </summary>
 public static class PhotoDtoMapper
 {
+    /// <summary>
+    /// Maps a <see cref="Photo"/> entity to a <see cref="PhotoDto"/>.
+    /// </summary>
+    /// <param name="photo">The source photo entity.</param>
+    /// <returns>A new <see cref="PhotoDto"/> populated from the entity.</returns>
     public static PhotoDto ToDto(Photo photo) => new()
     {
         Slug = photo.Slug,

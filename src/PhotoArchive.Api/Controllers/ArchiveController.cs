@@ -4,16 +4,27 @@ using PhotoArchive.Core.Models;
 
 namespace PhotoArchive.Api.Controllers;
 
+/// <summary>
+/// Provides endpoints for navigating the photo archive by year, month, and day.
+/// </summary>
 [ApiController]
 public class ArchiveController : ControllerBase
 {
     private readonly PhotoService _photoService;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="ArchiveController"/>.
+    /// </summary>
+    /// <param name="photoService">The photo data service.</param>
     public ArchiveController(PhotoService photoService)
     {
         _photoService = photoService;
     }
 
+    /// <summary>
+    /// Returns a summary of all years that contain photos in the archive.
+    /// </summary>
+    /// <returns>An object with a <c>years</c> array of <see cref="YearSummaryDto"/> items.</returns>
     [HttpGet("/years")]
     public async Task<IActionResult> GetYears()
     {
@@ -21,6 +32,11 @@ public class ArchiveController : ControllerBase
         return Ok(new { years });
     }
 
+    /// <summary>
+    /// Returns the detail for a specific year, including its months and navigation links.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <returns>A <see cref="YearDetailResponse"/>, or 404 if no photos exist for that year.</returns>
     [HttpGet("/years/{year:int}")]
     public async Task<IActionResult> GetYear(int year)
     {
@@ -32,6 +48,13 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Returns a paged list of photos taken in the specified year.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="page">The 1-based page number. Defaults to 1.</param>
+    /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items.</returns>
     [HttpGet("/years/{year:int}/photos")]
     public async Task<IActionResult> GetPhotosForYear(int year, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
@@ -39,6 +62,11 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Returns the months within a year that contain photos.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <returns>An object with <c>year</c> and a <c>months</c> array of <see cref="MonthSummaryDto"/> items.</returns>
     [HttpGet("/years/{year:int}/months")]
     public async Task<IActionResult> GetMonths(int year)
     {
@@ -46,6 +74,12 @@ public class ArchiveController : ControllerBase
         return Ok(new { year, months });
     }
 
+    /// <summary>
+    /// Returns the detail for a specific year/month, including its days and navigation links.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <returns>A <see cref="MonthDetailResponse"/>, or 404 if no photos exist for that month.</returns>
     [HttpGet("/years/{year:int}/months/{month:int}")]
     public async Task<IActionResult> GetMonth(int year, int month)
     {
@@ -60,6 +94,14 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Returns a paged list of photos taken in the specified year and month.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="page">The 1-based page number. Defaults to 1.</param>
+    /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items.</returns>
     [HttpGet("/years/{year:int}/months/{month:int}/photos")]
     public async Task<IActionResult> GetPhotosForMonth(int year, int month, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
@@ -70,6 +112,12 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Returns the days within a given year/month that contain photos, along with a photo count and navigation links.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <returns>An object with <c>year</c>, <c>month</c>, <c>photoCount</c>, <c>links</c>, and a <c>days</c> array of <see cref="DaySummaryDto"/> items.</returns>
     [HttpGet("/years/{year:int}/months/{month:int}/days")]
     public async Task<IActionResult> GetDays(int year, int month)
     {
@@ -92,6 +140,13 @@ public class ArchiveController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Returns the detail for a specific year/month/day, including photo count and navigation links.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <returns>A <see cref="DayDetailResponse"/>, or 404 if no photos exist on that date.</returns>
     [HttpGet("/years/{year:int}/months/{month:int}/days/{day:int}")]
     public async Task<IActionResult> GetDay(int year, int month, int day)
     {
@@ -109,6 +164,15 @@ public class ArchiveController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Returns a paged list of photos taken on the specified year/month/day.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <param name="page">The 1-based page number. Defaults to 1.</param>
+    /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items.</returns>
     [HttpGet("/years/{year:int}/months/{month:int}/days/{day:int}/photos")]
     public async Task<IActionResult> GetPhotosForDay(int year, int month, int day, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {

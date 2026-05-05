@@ -5,10 +5,17 @@ using PhotoArchive.Core.Mapping;
 
 namespace PhotoArchive.Data.Services;
 
+/// <summary>
+/// Provides data-access operations for photos, including retrieval by date, gallery, post, and slug.
+/// </summary>
 public class PhotoService
 {
     private readonly PhotoDbContext _db;
 
+    /// <summary>
+    /// Initializes a new instance of <see cref="PhotoService"/> with the given database context.
+    /// </summary>
+    /// <param name="db">The <see cref="PhotoDbContext"/> to use for data access.</param>
     public PhotoService(PhotoDbContext db)
     {
         _db = db;
@@ -84,6 +91,15 @@ public class PhotoService
         };
     }
 
+    /// <summary>
+    /// Returns a paged list of photos filtered by optional year, month, and day.
+    /// </summary>
+    /// <param name="year">Optional year filter.</param>
+    /// <param name="month">Optional month filter (1–12).</param>
+    /// <param name="day">Optional day filter (1–31).</param>
+    /// <param name="page">The 1-based page number to retrieve. Defaults to 1.</param>
+    /// <param name="pageSize">The maximum number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public async Task<PagedResponse<PhotoDto>> GetPhotosAsync(
         int? year,
         int? month,
@@ -105,6 +121,11 @@ public class PhotoService
         return await GetPagedPhotosAsync(query, BuildPhotoPath(year, month, day), page, pageSize);
     }
 
+    /// <summary>
+    /// Returns the full detail for a single photo identified by its slug, or <see langword="null"/> if not found.
+    /// </summary>
+    /// <param name="slug">The unique slug of the photo.</param>
+    /// <returns>A <see cref="PhotoDetailResponse"/> with the photo and its hypermedia links, or <see langword="null"/>.</returns>
     public async Task<PhotoDetailResponse?> GetPhotoDetailAsync(string slug)
     {
         var photo = await GetBySlugAsync(slug);
@@ -162,6 +183,11 @@ public class PhotoService
             Links = links
         };
     }
+    /// <summary>
+    /// Returns a summary for a blog post identified by <paramref name="postId"/>, or <see langword="null"/> if no photos are associated.
+    /// </summary>
+    /// <param name="postId">The identifier of the blog post.</param>
+    /// <returns>A <see cref="PostSummaryResponse"/> with post metadata and navigation links, or <see langword="null"/>.</returns>
     public async Task<PostSummaryResponse?> GetPostSummaryAsync(string postId)
     {
         var photos = await _db.Photos
@@ -192,6 +218,11 @@ public class PhotoService
             }
         };
     }
+    /// <summary>
+    /// Returns the <see cref="PhotoDto"/> for the photo with the given slug, or <see langword="null"/> if not found.
+    /// </summary>
+    /// <param name="slug">The unique slug of the photo.</param>
+    /// <returns>A <see cref="PhotoDto"/>, or <see langword="null"/> if no matching photo exists.</returns>
     public async Task<PhotoDto?> GetBySlugAsync(string slug)
     {
         var photo = await _db.Photos
@@ -200,6 +231,11 @@ public class PhotoService
         return photo is null ? null : PhotoDtoMapper.ToDto(photo);
     }
 
+    /// <summary>
+    /// Returns all photos belonging to the specified gallery, ordered by sort index then taken date.
+    /// </summary>
+    /// <param name="gallery">The gallery name.</param>
+    /// <returns>A list of <see cref="PhotoDto"/> items for the gallery.</returns>
     public async Task<List<PhotoDto>> GetByGalleryAsync(string gallery)
     {
         var photos = await _db.Photos
@@ -211,6 +247,11 @@ public class PhotoService
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
 
+    /// <summary>
+    /// Returns all photos associated with the specified blog post, ordered by sort index then taken date.
+    /// </summary>
+    /// <param name="postId">The blog post identifier.</param>
+    /// <returns>A list of <see cref="PhotoDto"/> items for the post.</returns>
     public async Task<List<PhotoDto>> GetByPostAsync(string postId)
     {
         var photos = await _db.Photos
@@ -222,6 +263,12 @@ public class PhotoService
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
 
+    /// <summary>
+    /// Returns up to 500 photos taken on the given month and day across all years, ordered by most recent year first.
+    /// </summary>
+    /// <param name="month">The month (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <returns>A flat list of <see cref="PhotoDto"/> items.</returns>
     public async Task<List<PhotoDto>> GetOnThisDayAsync(int month, int day)
     {
         var photos = await _db.Photos
@@ -235,6 +282,12 @@ public class PhotoService
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
 
+    /// <summary>
+    /// Returns an <see cref="OnThisDayResponse"/> that groups photos taken on the given month/day by year.
+    /// </summary>
+    /// <param name="month">The month (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <returns>An <see cref="OnThisDayResponse"/> with photos grouped by year, most recent first.</returns>
     public async Task<OnThisDayResponse> GetOnThisDayGroupedAsync(int month, int day)
     {
         var photos = await GetOnThisDayAsync(month, day);
@@ -258,6 +311,10 @@ public class PhotoService
                 .ToList()
         };
     }
+    /// <summary>
+    /// Returns the list of years that have at least one photo in the archive.
+    /// </summary>
+    /// <returns>A list of <see cref="YearSummaryDto"/> items ordered from most recent year to oldest.</returns>
     public async Task<List<YearSummaryDto>> GetYearsAsync()
     {
         var rows = await _db.Photos
@@ -283,6 +340,11 @@ public class PhotoService
             }
         }).ToList();
     }
+    /// <summary>
+    /// Returns the detail for the given year, including its months and navigation links, or <see langword="null"/> if no photos exist for that year.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <returns>A <see cref="YearDetailResponse"/>, or <see langword="null"/>.</returns>
     public async Task<YearDetailResponse?> GetYearAsync(int year)
     {
         var months = await GetMonthsAsync(year);
@@ -316,6 +378,11 @@ public class PhotoService
             }
         };
     }
+    /// <summary>
+    /// Returns the list of months within the given year that have at least one photo.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <returns>A list of <see cref="MonthSummaryDto"/> items ordered by month number.</returns>
     public async Task<List<MonthSummaryDto>> GetMonthsAsync(int year)
     {
         var rows = await _db.Photos
@@ -356,6 +423,12 @@ public class PhotoService
         }).ToList();
     }
 
+    /// <summary>
+    /// Returns the detail for a specific year/month, including its days and navigation links, or <see langword="null"/> if no photos exist.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <returns>A <see cref="MonthDetailResponse"/>, or <see langword="null"/>.</returns>
     public async Task<MonthDetailResponse?> GetMonthAsync(int year, int month)
     {
         var days = await GetDaysAsync(year, month);
@@ -390,6 +463,12 @@ public class PhotoService
             }
         };
     }
+    /// <summary>
+    /// Returns the list of days within a given year/month that have at least one photo.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <returns>A list of <see cref="DaySummaryDto"/> items ordered by day number.</returns>
     public async Task<List<DaySummaryDto>> GetDaysAsync(int year, int month)
     {
         var rows = await _db.Photos
@@ -430,6 +509,13 @@ public class PhotoService
             }
         }).ToList();
     }
+    /// <summary>
+    /// Returns the detail for a specific year/month/day, or <see langword="null"/> if no photos exist on that date.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <returns>A <see cref="DayDetailResponse"/>, or <see langword="null"/>.</returns>
     public async Task<DayDetailResponse?> GetDayAsync(int year, int month, int day)
     {
         var photoCount = await _db.Photos
@@ -468,6 +554,13 @@ public class PhotoService
             }
         };
     }
+    /// <summary>
+    /// Returns all photos taken on a specific date, ordered by sort index then taken time.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <returns>A list of <see cref="PhotoDto"/> items for the specified date.</returns>
     public async Task<List<PhotoDto>> GetPhotosByDateAsync(int year, int month, int day)
     {
         var photos = await _db.Photos
@@ -478,18 +571,42 @@ public class PhotoService
 
         return photos.Select(PhotoDtoMapper.ToDto).ToList();
     }
+    /// <summary>
+    /// Returns a paged list of photos taken in the specified year.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="page">The 1-based page number to retrieve.</param>
+    /// <param name="pageSize">The maximum number of results per page.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByYearAsync(int year, int page, int pageSize)
     {
         var query = _db.Photos.Where(p => p.Year == year);
         return GetPagedPhotosAsync(query, $"/years/{year}/photos", page, pageSize);
     }
 
+    /// <summary>
+    /// Returns a paged list of photos taken in the specified year and month.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="page">The 1-based page number to retrieve.</param>
+    /// <param name="pageSize">The maximum number of results per page.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByMonthAsync(int year, int month, int page, int pageSize)
     {
         var query = _db.Photos.Where(p => p.Year == year && p.Month == month);
         return GetPagedPhotosAsync(query, $"/years/{year}/months/{month}/photos", page, pageSize);
     }
 
+    /// <summary>
+    /// Returns a paged list of photos taken on the specified year, month, and day.
+    /// </summary>
+    /// <param name="year">The four-digit year.</param>
+    /// <param name="month">The month number (1–12).</param>
+    /// <param name="day">The day of the month (1–31).</param>
+    /// <param name="page">The 1-based page number to retrieve.</param>
+    /// <param name="pageSize">The maximum number of results per page.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByDayAsync(int year, int month, int day, int page, int pageSize)
     {
         var query = _db.Photos.Where(p => p.Year == year && p.Month == month && p.Day == day);

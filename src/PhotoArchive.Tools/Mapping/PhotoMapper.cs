@@ -1,8 +1,22 @@
 using System.Text.Json;
 using PhotoArchive.Core.Entities;
 
+/// <summary>
+/// Maps a parsed YAML front-matter dictionary from a Jekyll gallery Markdown file to a <see cref="Photo"/> entity.
+/// </summary>
 public static class PhotoMapper
 {
+    /// <summary>
+    /// Creates a <see cref="Photo"/> entity from the supplied front-matter dictionary.
+    /// </summary>
+    /// <param name="data">
+    /// A dictionary of key/value pairs parsed from a Jekyll gallery Markdown front-matter block.
+    /// Must contain at least an <c>id</c> key.
+    /// </param>
+    /// <returns>A new <see cref="Photo"/> populated from the front-matter values.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the required <c>id</c> field is missing or empty.
+    /// </exception>
     public static Photo Map(Dictionary<string, object> data)
     {
         var id = GetString(data, "id");

@@ -1,5 +1,13 @@
+/// <summary>
+/// Scans a directory of Jekyll gallery Markdown files and reports the front-matter fields found.
+/// </summary>
 public static class DiscoverCommand
 {
+    /// <summary>
+    /// Scans all <c>*.md</c> files under <paramref name="path"/>, parses their YAML front matter,
+    /// and prints a frequency report of every field key found.
+    /// </summary>
+    /// <param name="path">The root directory to scan recursively.</param>
     public static async Task Run(string path)
     {
         var files = Directory.GetFiles(path, "*.md", SearchOption.AllDirectories);
