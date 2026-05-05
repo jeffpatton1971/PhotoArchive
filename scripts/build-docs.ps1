@@ -35,21 +35,10 @@ foreach ($proj in $projects) {
         continue
     }
 
-    $projectOutputDir = Join-Path $generatedRoot $proj
-    New-Item -ItemType Directory -Force -Path $projectOutputDir | Out-Null
-    $output = Join-Path $projectOutputDir "$proj.md"
-
-    Write-Host "Generating docs for $proj -> $output"
-
-    dotnet tool run xml2doc -- `
     $output = Join-Path $generatedRoot "$proj.md"
 
     Write-Host "Generating docs for $proj -> $output"
-    Xml2Doc.Cli `
-        --xml "$($xmlPath.FullName)" `
-        --out "$output" `
-        --single `
-        --file-names clean
+    dotnet tool run xml2doc --xml "$($xmlPath.FullName)" --out "$output" --single --file-names clean
 }
 
 Write-Host "Documentation generation complete."
