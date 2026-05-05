@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "xml2doc.cli": {
+      "version": "1.4.0-preview.99-gfc4d072",
+      "commands": [
+        "xml2doc"
+      ]
+    }
+  }
+}
