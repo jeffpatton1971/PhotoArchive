@@ -197,4 +197,211 @@ public class PhotoService
                 .ToList()
         };
     }
+    public async Task<List<YearSummaryDto>> GetYearsAsync()
+    {
+        var rows = await _db.Photos
+            .Where(p => p.Year.HasValue)
+            .GroupBy(p => p.Year!.Value)
+            .Select(g => new
+            {
+                Year = g.Key,
+                PhotoCount = g.Count()
+            })
+            .OrderByDescending(x => x.Year)
+            .ToListAsync();
+
+        return rows.Select(x => new YearSummaryDto
+        {
+            Year = x.Year,
+            PhotoCount = x.PhotoCount,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["months"] = new() { Href = $"/years/{x.Year}/months" },
+                ["photos"] = new() { Href = $"/photos?year={x.Year}" }
+            }
+        }).ToList();
+    }
+    public async Task<YearDetailResponse?> GetYearAsync(int year)
+    {
+        var months = await GetMonthsAsync(year);
+
+        if (months.Count == 0)
+            return null;
+
+        return new YearDetailResponse
+        {
+            Year = year,
+            PhotoCount = months.Sum(m => m.PhotoCount),
+            Months = months,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = new()
+                {
+                    Href = $"/years/{year}"
+                },
+                ["months"] = new()
+                {
+                    Href = $"/years/{year}/months"
+                },
+                ["photos"] = new()
+                {
+                    Href = $"/photos?year={year}"
+                }
+            }
+        };
+    }
+    public async Task<List<MonthSummaryDto>> GetMonthsAsync(int year)
+    {
+        var rows = await _db.Photos
+            .Where(p => p.Year == year && p.Month.HasValue)
+            .GroupBy(p => p.Month!.Value)
+            .Select(g => new
+            {
+                Month = g.Key,
+                PhotoCount = g.Count()
+            })
+            .OrderBy(x => x.Month)
+            .ToListAsync();
+
+        return rows.Select(x => new MonthSummaryDto
+        {
+            Year = year,
+            Month = x.Month,
+            PhotoCount = x.PhotoCount,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = new()
+                {
+                    Href = $"/years/{year}/months/{x.Month}"
+                },
+                ["days"] = new()
+                {
+                    Href = $"/years/{year}/months/{x.Month}/days"
+                },
+                ["photos"] = new()
+                {
+                    Href = $"/photos?year={year}&month={x.Month}"
+                }
+            }
+        }).ToList();
+    }
+
+    public async Task<MonthDetailResponse?> GetMonthAsync(int year, int month)
+    {
+        var days = await GetDaysAsync(year, month);
+
+        if (days.Count == 0)
+            return null;
+
+        return new MonthDetailResponse
+        {
+            Year = year,
+            Month = month,
+            PhotoCount = days.Sum(d => d.PhotoCount),
+            Days = days,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}"
+                },
+                ["days"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/days"
+                },
+                ["photos"] = new()
+                {
+                    Href = $"/photos?year={year}&month={month}"
+                }
+            }
+        };
+    }
+    public async Task<List<DaySummaryDto>> GetDaysAsync(int year, int month)
+    {
+        var rows = await _db.Photos
+            .Where(p => p.Year == year && p.Month == month && p.Day.HasValue)
+            .GroupBy(p => p.Day!.Value)
+            .Select(g => new
+            {
+                Day = g.Key,
+                PhotoCount = g.Count()
+            })
+            .OrderBy(x => x.Day)
+            .ToListAsync();
+
+        return rows.Select(x => new DaySummaryDto
+        {
+            Year = year,
+            Month = month,
+            Day = x.Day,
+            PhotoCount = x.PhotoCount,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/days/{x.Day}"
+                },
+                ["photos"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/days/{x.Day}/photos"
+                },
+                ["query"] = new()
+                {
+                    Href = $"/photos?year={year}&month={month}&day={x.Day}"
+                },
+                ["onThisDay"] = new()
+                {
+                    Href = $"/on-this-day?month={month}&day={x.Day}"
+                }
+            }
+        }).ToList();
+    }
+    public async Task<DayDetailResponse?> GetDayAsync(int year, int month, int day)
+    {
+        var photoCount = await _db.Photos
+            .CountAsync(p =>
+                p.Year == year &&
+                p.Month == month &&
+                p.Day == day);
+
+        if (photoCount == 0)
+            return null;
+
+        return new DayDetailResponse
+        {
+            Year = year,
+            Month = month,
+            Day = day,
+            PhotoCount = photoCount,
+            Links = new Dictionary<string, ApiLink>
+            {
+                ["self"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/days/{day}"
+                },
+                ["photos"] = new()
+                {
+                    Href = $"/years/{year}/months/{month}/days/{day}/photos"
+                },
+                ["query"] = new()
+                {
+                    Href = $"/photos?year={year}&month={month}&day={day}"
+                },
+                ["onThisDay"] = new()
+                {
+                    Href = $"/on-this-day?month={month}&day={day}"
+                }
+            }
+        };
+    }
+    public async Task<List<PhotoDto>> GetPhotosByDateAsync(int year, int month, int day)
+    {
+        var photos = await _db.Photos
+            .Where(p => p.Year == year && p.Month == month && p.Day == day)
+            .OrderBy(p => p.SortIndex ?? int.MaxValue)
+            .ThenBy(p => p.TakenAt)
+            .ToListAsync();
+
+        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+    }
 }
