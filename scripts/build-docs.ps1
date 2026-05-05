@@ -2,6 +2,8 @@ param(
     [string]$Configuration = "Debug"
 )
 
+$ErrorActionPreference = "Stop"
+
 Write-Host "Building solution..."
 dotnet clean
 dotnet restore
@@ -33,7 +35,11 @@ foreach ($proj in $projects) {
     $output = Join-Path $generatedRoot "$proj.md"
 
     Write-Host "Generating docs for $proj -> $output"
-    xml2doc --input "$($xmlPath.FullName)" --output "$output"
+    xml2doc `
+        --xml "$($xmlPath.FullName)" `
+        --out "$output" `
+        --single `
+        --file-names clean
 }
 
 Write-Host "Documentation generation complete."
