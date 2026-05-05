@@ -3,6 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $true
 
 Write-Host "Building solution..."
 dotnet clean
@@ -25,13 +26,22 @@ New-Item -ItemType Directory -Force -Path $generatedRoot | Out-Null
 foreach ($proj in $projects) {
     Write-Host "Processing $proj..."
 
-    $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Select-Object -First 1
+    $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Where-Object {
+        $_.FullName -like "*bin*$Configuration*"
+    } | Select-Object -First 1
 
     if (-not $xmlPath) {
-        Write-Warning "No XML doc found for $proj"
+        Write-Warning "No XML doc found for $proj in configuration '$Configuration'"
         continue
     }
 
+    $projectOutputDir = Join-Path $generatedRoot $proj
+    New-Item -ItemType Directory -Force -Path $projectOutputDir | Out-Null
+    $output = Join-Path $projectOutputDir "$proj.md"
+
+    Write-Host "Generating docs for $proj -> $output"
+
+    dotnet tool run xml2doc -- `
     $output = Join-Path $generatedRoot "$proj.md"
 
     Write-Host "Generating docs for $proj -> $output"
