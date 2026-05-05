@@ -31,11 +31,7 @@ foreach ($proj in $projects) {
     } | Select-Object -First 1
 
     if (-not $xmlPath) {
-        $xmlPath = Get-ChildItem -Recurse -Filter "$proj.xml" | Select-Object -First 1
-    }
-
-    if (-not $xmlPath) {
-        Write-Warning "No XML doc found for $proj"
+        Write-Warning "No XML doc found for $proj in configuration '$Configuration'"
         continue
     }
 
