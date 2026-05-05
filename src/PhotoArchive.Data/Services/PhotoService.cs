@@ -40,6 +40,51 @@ public class PhotoService
         return "/photos?" + string.Join("&", parameters);
     }
 
+    /// <summary>
+    /// Builds an <see cref="IQueryable{T}"/> of <see cref="Photo"/> records filtered by the supplied
+    /// <paramref name="options"/>. All photo collection queries are routed through this method to ensure
+    /// consistent filtering behaviour across every endpoint.
+    /// </summary>
+    /// <param name="options">The filter and pagination options.</param>
+    /// <returns>A filtered, unexecuted <see cref="IQueryable{Photo}"/>.</returns>
+    private IQueryable<Photo> BuildPhotoQuery(PhotoQueryOptions options)
+    {
+        var query = _db.Photos.AsQueryable();
+
+        if (options.Year.HasValue)
+            query = query.Where(p => p.Year == options.Year.Value);
+
+        if (options.Month.HasValue)
+            query = query.Where(p => p.Month == options.Month.Value);
+
+        if (options.Day.HasValue)
+            query = query.Where(p => p.Day == options.Day.Value);
+
+        if (!string.IsNullOrWhiteSpace(options.Source))
+            query = query.Where(p => p.Source == options.Source);
+
+        if (!string.IsNullOrWhiteSpace(options.Gallery))
+            query = query.Where(p => p.Gallery == options.Gallery);
+
+        if (!string.IsNullOrWhiteSpace(options.PostId))
+            query = query.Where(p => p.PostId == options.PostId);
+
+        return query;
+    }
+
+    /// <summary>
+    /// Returns a paged list of photos matching the supplied <paramref name="options"/>.
+    /// All photo collection endpoints route through this method.
+    /// </summary>
+    /// <param name="options">The filter and pagination options.</param>
+    /// <param name="path">The canonical URL path used for link generation (without pagination query params).</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items.</returns>
+    public Task<PagedResponse<PhotoDto>> GetPhotosByQueryAsync(PhotoQueryOptions options, string path)
+    {
+        var query = BuildPhotoQuery(options);
+        return GetPagedPhotosAsync(query, path, options.Page, options.PageSize);
+    }
+
     private static string BuildPagedHref(string path, int page, int pageSize)
     {
         var separator = path.Contains('?') ? '&' : '?';
@@ -92,33 +137,41 @@ public class PhotoService
     }
 
     /// <summary>
-    /// Returns a paged list of photos filtered by optional year, month, and day.
+    /// Returns a paged list of photos filtered by optional year, month, day, source, gallery, and post.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="year">Optional year filter.</param>
     /// <param name="month">Optional month filter (1–12).</param>
     /// <param name="day">Optional day filter (1–31).</param>
+    /// <param name="source">Optional import source filter.</param>
+    /// <param name="gallery">Optional gallery name filter.</param>
+    /// <param name="postId">Optional blog post identifier filter.</param>
     /// <param name="page">The 1-based page number to retrieve. Defaults to 1.</param>
     /// <param name="pageSize">The maximum number of results per page. Defaults to 50.</param>
     /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
-    public async Task<PagedResponse<PhotoDto>> GetPhotosAsync(
+    public Task<PagedResponse<PhotoDto>> GetPhotosAsync(
         int? year,
         int? month,
         int? day,
         int page = 1,
-        int pageSize = 50)
+        int pageSize = 50,
+        string? source = null,
+        string? gallery = null,
+        string? postId = null)
     {
-        var query = _db.Photos.AsQueryable();
+        var options = new PhotoQueryOptions
+        {
+            Year = year,
+            Month = month,
+            Day = day,
+            Source = source,
+            Gallery = gallery,
+            PostId = postId,
+            Page = page,
+            PageSize = pageSize
+        };
 
-        if (year.HasValue)
-            query = query.Where(p => p.Year == year.Value);
-
-        if (month.HasValue)
-            query = query.Where(p => p.Month == month.Value);
-
-        if (day.HasValue)
-            query = query.Where(p => p.Day == day.Value);
-
-        return await GetPagedPhotosAsync(query, BuildPhotoPath(year, month, day), page, pageSize);
+        return GetPhotosByQueryAsync(options, BuildPhotoPath(year, month, day));
     }
 
     /// <summary>
@@ -234,35 +287,31 @@ public class PhotoService
     }
 
     /// <summary>
-    /// Returns all photos belonging to the specified gallery, ordered by sort index then taken date.
+    /// Returns a paged list of photos belonging to the specified gallery.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="gallery">The gallery name.</param>
-    /// <returns>A list of <see cref="PhotoDto"/> items for the gallery.</returns>
-    public async Task<List<PhotoDto>> GetByGalleryAsync(string gallery)
+    /// <param name="page">The 1-based page number to retrieve. Defaults to 1.</param>
+    /// <param name="pageSize">The maximum number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items for the gallery.</returns>
+    public Task<PagedResponse<PhotoDto>> GetByGalleryAsync(string gallery, int page = 1, int pageSize = 50)
     {
-        var photos = await _db.Photos
-            .Where(p => p.Gallery == gallery)
-            .OrderBy(p => p.SortIndex ?? int.MaxValue)
-            .ThenBy(p => p.TakenAt)
-            .ToListAsync();
-
-        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+        var options = new PhotoQueryOptions { Gallery = gallery, Page = page, PageSize = pageSize };
+        return GetPhotosByQueryAsync(options, $"/galleries/{Uri.EscapeDataString(gallery)}/photos");
     }
 
     /// <summary>
-    /// Returns all photos associated with the specified blog post, ordered by sort index then taken date.
+    /// Returns a paged list of photos associated with the specified blog post.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="postId">The blog post identifier.</param>
-    /// <returns>A list of <see cref="PhotoDto"/> items for the post.</returns>
-    public async Task<List<PhotoDto>> GetByPostAsync(string postId)
+    /// <param name="page">The 1-based page number to retrieve. Defaults to 1.</param>
+    /// <param name="pageSize">The maximum number of results per page. Defaults to 50.</param>
+    /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items for the post.</returns>
+    public Task<PagedResponse<PhotoDto>> GetByPostAsync(string postId, int page = 1, int pageSize = 50)
     {
-        var photos = await _db.Photos
-            .Where(p => p.PostId == postId)
-            .OrderBy(p => p.SortIndex ?? int.MaxValue)
-            .ThenBy(p => p.TakenAt)
-            .ToListAsync();
-
-        return photos.Select(PhotoDtoMapper.ToDto).ToList();
+        var options = new PhotoQueryOptions { PostId = postId, Page = page, PageSize = pageSize };
+        return GetPhotosByQueryAsync(options, $"/posts/{Uri.EscapeDataString(postId)}/photos");
     }
 
     /// <summary>
@@ -580,6 +629,7 @@ public class PhotoService
     }
     /// <summary>
     /// Returns a paged list of photos taken in the specified year.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="year">The four-digit year.</param>
     /// <param name="page">The 1-based page number to retrieve.</param>
@@ -587,12 +637,13 @@ public class PhotoService
     /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByYearAsync(int year, int page, int pageSize)
     {
-        var query = _db.Photos.Where(p => p.Year == year);
-        return GetPagedPhotosAsync(query, $"/years/{year}/photos", page, pageSize);
+        var options = new PhotoQueryOptions { Year = year, Page = page, PageSize = pageSize };
+        return GetPhotosByQueryAsync(options, $"/years/{year}/photos");
     }
 
     /// <summary>
     /// Returns a paged list of photos taken in the specified year and month.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="year">The four-digit year.</param>
     /// <param name="month">The month number (1–12).</param>
@@ -601,12 +652,13 @@ public class PhotoService
     /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByMonthAsync(int year, int month, int page, int pageSize)
     {
-        var query = _db.Photos.Where(p => p.Year == year && p.Month == month);
-        return GetPagedPhotosAsync(query, $"/years/{year}/months/{month}/photos", page, pageSize);
+        var options = new PhotoQueryOptions { Year = year, Month = month, Page = page, PageSize = pageSize };
+        return GetPhotosByQueryAsync(options, $"/years/{year}/months/{month}/photos");
     }
 
     /// <summary>
     /// Returns a paged list of photos taken on the specified year, month, and day.
+    /// Delegates to <see cref="GetPhotosByQueryAsync"/> so that all collection endpoints share the same filtering path.
     /// </summary>
     /// <param name="year">The four-digit year.</param>
     /// <param name="month">The month number (1–12).</param>
@@ -616,7 +668,7 @@ public class PhotoService
     /// <returns>A <see cref="PagedResponse{T}"/> containing the matching <see cref="PhotoDto"/> items.</returns>
     public Task<PagedResponse<PhotoDto>> GetPhotosByDayAsync(int year, int month, int day, int page, int pageSize)
     {
-        var query = _db.Photos.Where(p => p.Year == year && p.Month == month && p.Day == day);
-        return GetPagedPhotosAsync(query, $"/years/{year}/months/{month}/days/{day}/photos", page, pageSize);
+        var options = new PhotoQueryOptions { Year = year, Month = month, Day = day, Page = page, PageSize = pageSize };
+        return GetPhotosByQueryAsync(options, $"/years/{year}/months/{month}/days/{day}/photos");
     }
 }
