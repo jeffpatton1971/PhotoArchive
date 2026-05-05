@@ -6,7 +6,11 @@ namespace PhotoArchive.Core.Entities
 
         public string Slug { get; set; } = default!;
         public string? Title { get; set; }
-
+        public string? Gallery { get; set; }
+        public string? PostUrl { get; set; }
+        public string? PostId { get; set; }
+        public int? SortIndex { get; set; }
+        public string? SourceFilename { get; set; }
         public DateTimeOffset? TakenAt { get; set; }
 
         public int? Year { get; set; }
