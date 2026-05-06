@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 type YearCardProps = {
   year: number;
   photoCount: number;
@@ -8,7 +10,7 @@ function YearCard({ year, photoCount }: YearCardProps) {
     <article className="year-card">
       <h3>{year}</h3>
       <p>{photoCount} photos</p>
-      <a href={`/archive/${year}`}>View year</a>
+      <Link to={`/archive/${year}`}>View year</Link>
     </article>
   );
 }

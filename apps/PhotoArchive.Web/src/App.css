@@ -78,3 +78,24 @@
   flex: 1;
   padding: 2rem;
 }
+
+.month-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.month-card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+}
+
+.month-card h3 {
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.month-card a {
+  color: #0645ad;
+}
