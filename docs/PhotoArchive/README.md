@@ -6,6 +6,7 @@ This folder is the canonical documentation home for the PhotoArchive project.
 
 - [Overview](overview/current-status.md)
 - [Architecture](architecture/api-design.md)
+- [Frontend](frontend/README.md)
 - [API](api/photos.md)
 - [Workflows](workflows/import-jekyll-gallery.md)
 - [Components](components/PhotoArchive.Api.md)
