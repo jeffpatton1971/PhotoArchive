@@ -100,27 +100,42 @@ Initializes a new instance of [PhotoService](#photoservice) with the given datab
 **Parameters**
 - `db` — The [PhotoDbContext](#photodbcontext) to use for data access.
 
-<a id="photoarchive.data.services.photoservice.getbygalleryasync(string)"></a>
-## Method: GetByGalleryAsync(string)
-Returns all photos belonging to the specified gallery, ordered by sort index then taken date.
+<a id="photoarchive.data.services.photoservice.buildphotoquery(photoarchive.core.models.photoqueryoptions)"></a>
+## Method: BuildPhotoQuery(PhotoQueryOptions)
+Builds an [IQueryable<T1>](#iqueryablet1) of [Photo](#photo) records filtered by the supplied `options`. All photo collection queries are routed through this method to ensure consistent filtering behaviour across every endpoint.
+
+**Parameters**
+- `options` — The filter and pagination options.
+
+**Returns**
+
+A filtered, unexecuted [IQueryable<T1>](#iqueryablet1).
+
+<a id="photoarchive.data.services.photoservice.getbygalleryasync(string,int,int)"></a>
+## Method: GetByGalleryAsync(string, int, int)
+Returns a paged list of photos belonging to the specified gallery. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `gallery` — The gallery name.
+- `page` — The 1-based page number to retrieve. Defaults to 1.
+- `pageSize` — The maximum number of results per page. Defaults to 50.
 
 **Returns**
 
-A list of [PhotoDto](#photodto) items for the gallery.
+A [PagedResponse<T1>](#pagedresponset1) of [PhotoDto](#photodto) items for the gallery.
 
-<a id="photoarchive.data.services.photoservice.getbypostasync(string)"></a>
-## Method: GetByPostAsync(string)
-Returns all photos associated with the specified blog post, ordered by sort index then taken date.
+<a id="photoarchive.data.services.photoservice.getbypostasync(string,int,int)"></a>
+## Method: GetByPostAsync(string, int, int)
+Returns a paged list of photos associated with the specified blog post. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `postId` — The blog post identifier.
+- `page` — The 1-based page number to retrieve. Defaults to 1.
+- `pageSize` — The maximum number of results per page. Defaults to 50.
 
 **Returns**
 
-A list of [PhotoDto](#photodto) items for the post.
+A [PagedResponse<T1>](#pagedresponset1) of [PhotoDto](#photodto) items for the post.
 
 <a id="photoarchive.data.services.photoservice.getbyslugasync(string)"></a>
 ## Method: GetBySlugAsync(string)
@@ -216,14 +231,17 @@ Returns the full detail for a single photo identified by its slug, or if not fou
 
 A [PhotoDetailResponse](#photodetailresponse) with the photo and its hypermedia links, or.
 
-<a id="photoarchive.data.services.photoservice.getphotosasync(system.nullable[int],system.nullable[int],system.nullable[int],int,int)"></a>
-## Method: GetPhotosAsync(Nullable<int>, Nullable<int>, Nullable<int>, int, int)
-Returns a paged list of photos filtered by optional year, month, and day.
+<a id="photoarchive.data.services.photoservice.getphotosasync(system.nullable[int],system.nullable[int],system.nullable[int],int,int,string,string,string)"></a>
+## Method: GetPhotosAsync(Nullable<int>, Nullable<int>, Nullable<int>, int, int, string, string, string)
+Returns a paged list of photos filtered by optional year, month, day, source, gallery, and post. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `year` — Optional year filter.
 - `month` — Optional month filter (1–12).
 - `day` — Optional day filter (1–31).
+- `source` — Optional import source filter.
+- `gallery` — Optional gallery name filter.
+- `postId` — Optional blog post identifier filter.
 - `page` — The 1-based page number to retrieve. Defaults to 1.
 - `pageSize` — The maximum number of results per page. Defaults to 50.
 
@@ -246,7 +264,7 @@ A list of [PhotoDto](#photodto) items for the specified date.
 
 <a id="photoarchive.data.services.photoservice.getphotosbydayasync(int,int,int,int,int)"></a>
 ## Method: GetPhotosByDayAsync(int, int, int, int, int)
-Returns a paged list of photos taken on the specified year, month, and day.
+Returns a paged list of photos taken on the specified year, month, and day. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `year` — The four-digit year.
@@ -261,7 +279,7 @@ A [PagedResponse<T1>](#pagedresponset1) containing the matching [PhotoDto](#phot
 
 <a id="photoarchive.data.services.photoservice.getphotosbymonthasync(int,int,int,int)"></a>
 ## Method: GetPhotosByMonthAsync(int, int, int, int)
-Returns a paged list of photos taken in the specified year and month.
+Returns a paged list of photos taken in the specified year and month. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `year` — The four-digit year.
@@ -273,9 +291,21 @@ Returns a paged list of photos taken in the specified year and month.
 
 A [PagedResponse<T1>](#pagedresponset1) containing the matching [PhotoDto](#photodto) items.
 
+<a id="photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)"></a>
+## Method: GetPhotosByQueryAsync(PhotoQueryOptions, string)
+Returns a paged list of photos matching the supplied `options`. All photo collection endpoints route through this method. When filtering by gallery or post, photos are ordered by `SortIndex` then `TakenAt` to preserve authored sequence. All other queries order by most-recent `TakenAt` first.
+
+**Parameters**
+- `options` — The filter and pagination options.
+- `path` — The canonical URL path used for link generation (without pagination query params).
+
+**Returns**
+
+A [PagedResponse<T1>](#pagedresponset1) of [PhotoDto](#photodto) items.
+
 <a id="photoarchive.data.services.photoservice.getphotosbyyearasync(int,int,int)"></a>
 ## Method: GetPhotosByYearAsync(int, int, int)
-Returns a paged list of photos taken in the specified year.
+Returns a paged list of photos taken in the specified year. Delegates to [GetPhotosByQueryAsync(PhotoQueryOptions, string)](#photoarchive.data.services.photoservice.getphotosbyqueryasync(photoarchive.core.models.photoqueryoptions,string)) so that all collection endpoints share the same filtering path.
 
 **Parameters**
 - `year` — The four-digit year.

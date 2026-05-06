@@ -1,6 +1,9 @@
 # API Reference
 - [ArchiveController](#archivecontroller)
+- [GalleriesController](#galleriescontroller)
+- [OnThisDayController](#onthisdaycontroller)
 - [PhotosController](#photoscontroller)
+- [PostsController](#postscontroller)
 - [Program](#program)
 
 <a id="archivecontroller"></a>
@@ -127,10 +130,65 @@ An object with a `years` array of [YearSummaryDto](#yearsummarydto) items.
 
 ---
 
+<a id="galleriescontroller"></a>
+# GalleriesController
+
+Provides endpoints for querying photos within a named gallery. Gallery identity is derived from imported metadata; no first-class Gallery entity exists yet.
+
+<a id="photoarchive.api.controllers.galleriescontroller.#ctor(photoarchive.data.services.photoservice)"></a>
+## Method: #ctor(PhotoService)
+Initializes a new instance of [GalleriesController](#galleriescontroller).
+
+**Parameters**
+- `photoService` — The photo data service.
+
+<a id="photoarchive.api.controllers.galleriescontroller.getgalleryphotos(string,int,int)"></a>
+## Method: GetGalleryPhotos(string, int, int)
+Returns a paged list of photos belonging to the specified gallery.
+
+**Parameters**
+- `gallery` — The gallery name.
+- `page` — The 1-based page number. Defaults to 1.
+- `pageSize` — The number of results per page. Defaults to 50.
+
+**Returns**
+
+A [PagedResponse<T1>](#pagedresponset1) of [PhotoDto](#photodto) items in the gallery.
+
+
+---
+
+<a id="onthisdaycontroller"></a>
+# OnThisDayController
+
+Provides the "On This Day" endpoint, which returns photos grouped by year for a given month and day.
+
+<a id="photoarchive.api.controllers.onthisdaycontroller.#ctor(photoarchive.data.services.photoservice)"></a>
+## Method: #ctor(PhotoService)
+Initializes a new instance of [OnThisDayController](#onthisdaycontroller).
+
+**Parameters**
+- `photoService` — The photo data service.
+
+<a id="photoarchive.api.controllers.onthisdaycontroller.getonthisday(system.nullable[int],system.nullable[int])"></a>
+## Method: GetOnThisDay(Nullable<int>, Nullable<int>)
+Returns photos grouped by year for a given month and day, defaulting to today's UTC date if not specified.
+
+**Parameters**
+- `month` — Optional month override (1–12). Defaults to the current UTC month.
+- `day` — Optional day override (1–31). Defaults to the current UTC day.
+
+**Returns**
+
+An [OnThisDayResponse](#onthisdayresponse) grouped by year.
+
+
+---
+
 <a id="photoscontroller"></a>
 # PhotosController
 
-Provides endpoints for querying individual photos, galleries, posts, and the "On This Day" feature.
+Provides endpoints for querying the photo collection and retrieving individual photo detail.
 
 <a id="photoarchive.api.controllers.photoscontroller.#ctor(photoarchive.data.services.photoservice)"></a>
 ## Method: #ctor(PhotoService)
@@ -138,28 +196,6 @@ Initializes a new instance of [PhotosController](#photoscontroller).
 
 **Parameters**
 - `photoService` — The photo data service.
-
-<a id="photoarchive.api.controllers.photoscontroller.getbygallery(string)"></a>
-## Method: GetByGallery(string)
-Returns all photos that belong to the specified gallery.
-
-**Parameters**
-- `gallery` — The gallery name.
-
-**Returns**
-
-A list of photos in the gallery.
-
-<a id="photoarchive.api.controllers.photoscontroller.getbypost(string)"></a>
-## Method: GetByPost(string)
-Returns all photos associated with the specified blog post.
-
-**Parameters**
-- `postId` — The blog post identifier.
-
-**Returns**
-
-A list of photos for the post.
 
 <a id="photoarchive.api.controllers.photoscontroller.getbyslug(string)"></a>
 ## Method: GetBySlug(string)
@@ -172,26 +208,17 @@ Returns the detail for a single photo identified by its slug.
 
 A [PhotoDetailResponse](#photodetailresponse), or 404 if not found.
 
-<a id="photoarchive.api.controllers.photoscontroller.getonthisday(system.nullable[int],system.nullable[int])"></a>
-## Method: GetOnThisDay(Nullable<int>, Nullable<int>)
-Returns photos grouped by year for a given month and day, defaulting to today's date if not specified.
-
-**Parameters**
-- `month` — Optional month override (1–12). Defaults to the current UTC month.
-- `day` — Optional day override (1–31). Defaults to the current UTC day.
-
-**Returns**
-
-An [OnThisDayResponse](#onthisdayresponse) grouped by year.
-
-<a id="photoarchive.api.controllers.photoscontroller.getphotos(system.nullable[int],system.nullable[int],system.nullable[int],int,int)"></a>
-## Method: GetPhotos(Nullable<int>, Nullable<int>, Nullable<int>, int, int)
-Returns a paged list of photos, optionally filtered by year, month, and/or day.
+<a id="photoarchive.api.controllers.photoscontroller.getphotos(system.nullable[int],system.nullable[int],system.nullable[int],string,string,string,int,int)"></a>
+## Method: GetPhotos(Nullable<int>, Nullable<int>, Nullable<int>, string, string, string, int, int)
+Returns a paged list of photos, optionally filtered by year, month, day, source, gallery, and/or post.
 
 **Parameters**
 - `year` — Optional year filter.
 - `month` — Optional month filter (1–12).
 - `day` — Optional day filter (1–31).
+- `source` — Optional import source filter (e.g., "legacy", "facebook").
+- `gallery` — Optional gallery name filter.
+- `postId` — Optional blog post identifier filter.
 - `page` — The 1-based page number. Defaults to 1.
 - `pageSize` — The number of results per page. Defaults to 50.
 
@@ -199,8 +226,36 @@ Returns a paged list of photos, optionally filtered by year, month, and/or day.
 
 A paged list of photos matching the supplied filters.
 
-<a id="photoarchive.api.controllers.photoscontroller.getpost(string)"></a>
-## Method: GetPost(string)
+
+---
+
+<a id="postscontroller"></a>
+# PostsController
+
+Provides endpoints for querying blog posts and their associated photos.
+
+<a id="photoarchive.api.controllers.postscontroller.#ctor(photoarchive.data.services.photoservice)"></a>
+## Method: #ctor(PhotoService)
+Initializes a new instance of [PostsController](#postscontroller).
+
+**Parameters**
+- `photoService` — The photo data service.
+
+<a id="photoarchive.api.controllers.postscontroller.getpostphotos(string,int,int)"></a>
+## Method: GetPostPhotos(string, int, int)
+Returns a paged list of photos associated with the specified blog post.
+
+**Parameters**
+- `postId` — The blog post identifier.
+- `page` — The 1-based page number. Defaults to 1.
+- `pageSize` — The number of results per page. Defaults to 50.
+
+**Returns**
+
+A [PagedResponse<T1>](#pagedresponset1) of [PhotoDto](#photodto) items for the post.
+
+<a id="photoarchive.api.controllers.postscontroller.getpostsummary(string)"></a>
+## Method: GetPostSummary(string)
 Returns a summary for the specified blog post, including photo count and navigation links.
 
 **Parameters**
