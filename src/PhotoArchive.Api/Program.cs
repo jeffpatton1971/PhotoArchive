@@ -22,3 +22,6 @@ app.UseSwaggerUI();
 app.MapControllers();
 
 app.Run();
+
+/// <summary>Exposes the top-level Program class so that integration tests can reference it via WebApplicationFactory.</summary>
+public partial class Program { }
