@@ -12,7 +12,7 @@ Install the latest .NET 10 SDK:
 
 ```powershell
 winget install Microsoft.DotNet.SDK.10
-````
+```
 
 Verify:
 
@@ -22,7 +22,26 @@ dotnet --version
 
 ---
 
-### 2. Git
+### 2. Node.js LTS
+
+Required for the React + TypeScript + Vite frontend in `apps/PhotoArchive.Web`.
+
+Download and install the current Node.js LTS release:
+
+```powershell
+winget install OpenJS.NodeJS.LTS
+```
+
+Verify:
+
+```powershell
+node --version
+npm --version
+```
+
+---
+
+### 3. Git
 
 Required for cloning and branch/PR workflow.
 
@@ -38,7 +57,7 @@ git --version
 
 ---
 
-### 3. Docker Desktop
+### 4. Docker Desktop
 
 Used for local PostgreSQL.
 
@@ -56,7 +75,7 @@ docker version
 
 ---
 
-### 4. PostgreSQL Client Tools
+### 5. PostgreSQL Client Tools
 
 Optional but useful for inspecting the database.
 
@@ -72,7 +91,7 @@ winget install dbeaver.dbeaver
 
 ---
 
-### 5. VS Code Extensions
+### 6. VS Code Extensions
 
 Recommended:
 
@@ -99,18 +118,27 @@ cd PhotoArchive
 
 ## Restore and Build
 
+Restore and build the .NET projects:
+
 ```powershell
 dotnet restore
 dotnet build
+```
+
+Install and build the frontend:
+
+```powershell
+npm install --prefix apps/PhotoArchive.Web
+npm run build --prefix apps/PhotoArchive.Web
 ```
 
 ---
 
 ## Database Setup
 
-Start PostgreSQL using Docker/Docker Compose if configured in the repo.
+Start PostgreSQL using Docker Desktop.
 
-Typical command:
+Create and start the local PostgreSQL container:
 
 ```powershell
 docker run --name photoarchive-postgres `
@@ -119,7 +147,11 @@ docker run --name photoarchive-postgres `
   -e POSTGRES_PASSWORD=postgres `
   -p 5432:5432 `
   -d postgres:16
+```
 
+If the container already exists but is stopped:
+
+```powershell
 docker start photoarchive-postgres
 ```
 
@@ -155,6 +187,20 @@ Swagger:
 
 ```text
 http://localhost:5296/swagger
+```
+
+---
+
+## Run the Frontend
+
+```powershell
+npm run dev --prefix apps/PhotoArchive.Web
+```
+
+Vite:
+
+```text
+http://localhost:5173
 ```
 
 ---
@@ -224,6 +270,7 @@ src/PhotoArchive.Core       DTOs, models, link builders
 src/PhotoArchive.Data       EF Core, PostgreSQL, services
 src/PhotoArchive.Tools      Import tooling
 src/PhotoArchive.Functions  Azure Functions experiments
+apps/PhotoArchive.Web       React + TypeScript + Vite frontend
 tests/PhotoArchive.Tests    API and service tests
 docs/PhotoArchive           Project documentation
 ```
@@ -234,12 +281,18 @@ docs/PhotoArchive           Project documentation
 
 ```text
 [ ] .NET 10 SDK
+[ ] Node.js LTS
 [ ] Git
 [ ] Docker Desktop
-[ ] VS Code C# extensions
+[ ] VS Code extensions
 [ ] dotnet restore
-[ ] docker compose up -d
+[ ] dotnet build
+[ ] npm install --prefix apps/PhotoArchive.Web
+[ ] npm run build --prefix apps/PhotoArchive.Web
+[ ] start photoarchive-postgres container
 [ ] dotnet ef database update
 [ ] dotnet run --project src/PhotoArchive.Api
+[ ] npm run dev --prefix apps/PhotoArchive.Web
 [ ] open /swagger
 [ ] dotnet test
+```
