@@ -1,0 +1,75 @@
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header {
+  padding: 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.site-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.site-header p {
+  margin: 0.5rem 0 1.5rem;
+  color: #555;
+}
+
+.site-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.site-nav a {
+  color: #0645ad;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
+}
+
+.hero {
+  flex: 1;
+  padding: 2rem;
+}
+
+.hero h2 {
+  margin-top: 0;
+}
+
+.site-footer {
+  padding: 1rem 2rem;
+  border-top: 1px solid #ddd;
+  color: #666;
+}
+
+.archive-preview {
+  padding: 2rem;
+  border-top: 1px solid #ddd;
+}
+
+.year-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.year-card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+}
+
+.year-card h3 {
+  margin-top: 0;
+  font-size: 1.75rem;
+}
+
+.year-card a {
+  color: #0645ad;
+}
