@@ -3,8 +3,10 @@
 - [PhotoDtoMapper](#photodtomapper)
 - [ApiLink](#apilink)
 - [DayDetailResponse](#daydetailresponse)
+- [DaysResponse](#daysresponse)
 - [DaySummaryDto](#daysummarydto)
 - [MonthDetailResponse](#monthdetailresponse)
+- [MonthsResponse](#monthsresponse)
 - [MonthSummaryDto](#monthsummarydto)
 - [OnThisDayResponse](#onthisdayresponse)
 - [OnThisDayYearGroup](#onthisdayyeargroup)
@@ -14,7 +16,9 @@
 - [PhotoDto](#photodto)
 - [PhotoQueryOptions](#photoqueryoptions)
 - [PostSummaryResponse](#postsummaryresponse)
+- [ResourceLinkBuilder](#resourcelinkbuilder)
 - [YearDetailResponse](#yeardetailresponse)
+- [YearsResponse](#yearsresponse)
 - [YearSummaryDto](#yearsummarydto)
 
 <a id="photo"></a>
@@ -152,6 +156,34 @@ Gets or sets the year component of the date.
 
 ---
 
+<a id="daysresponse"></a>
+# DaysResponse
+
+The response returned when listing days within a year/month that contain photos.
+
+<a id="photoarchive.core.models.daysresponse.days"></a>
+## Property: Days
+Gets or sets the list of days within this month that contain at least one photo.
+
+<a id="photoarchive.core.models.daysresponse.links"></a>
+## Property: Links
+Gets or sets the hypermedia navigation links for this month's day listing. Includes: `self`, `photos`, `query`.
+
+<a id="photoarchive.core.models.daysresponse.month"></a>
+## Property: Month
+Gets or sets the month number (1–12).
+
+<a id="photoarchive.core.models.daysresponse.photocount"></a>
+## Property: PhotoCount
+Gets or sets the total number of photos taken during this month.
+
+<a id="photoarchive.core.models.daysresponse.year"></a>
+## Property: Year
+Gets or sets the year.
+
+
+---
+
 <a id="daysummarydto"></a>
 # DaySummaryDto
 
@@ -204,6 +236,22 @@ Gets or sets the total number of photos taken during this month.
 <a id="photoarchive.core.models.monthdetailresponse.year"></a>
 ## Property: Year
 Gets or sets the year of the month.
+
+
+---
+
+<a id="monthsresponse"></a>
+# MonthsResponse
+
+The response returned when listing months within a year that contain photos.
+
+<a id="photoarchive.core.models.monthsresponse.months"></a>
+## Property: Months
+Gets or sets the list of months within this year that contain at least one photo.
+
+<a id="photoarchive.core.models.monthsresponse.year"></a>
+## Property: Year
+Gets or sets the year.
 
 
 ---
@@ -466,6 +514,144 @@ Gets or sets the URL of the blog post, if available.
 
 ---
 
+<a id="resourcelinkbuilder"></a>
+# ResourceLinkBuilder
+
+Builds canonical resource link strings for PhotoArchive API responses. All route strings produced here must match the routes declared in the API controllers.
+
+**Remarks**
+
+Methods return raw path strings (with optional query parameters) that are suitable for use as the [Href](#photoarchive.core.models.apilink.href) value. They do not perform HTTP dispatch and have no dependency on ASP.NET routing infrastructure.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.day(int,int,int)"></a>
+## Method: Day(int, int, int)
+Returns the self path for a day: `/years/{year}/months/{month}/days/{day}`.
+
+**Parameters**
+- `year` — The four-digit year.
+- `month` — The month number (1–12).
+- `day` — The day of the month (1–31).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.dayphotos(int,int,int)"></a>
+## Method: DayPhotos(int, int, int)
+Returns the photos path for a day: `/years/{year}/months/{month}/days/{day}/photos`.
+
+**Parameters**
+- `year` — The four-digit year.
+- `month` — The month number (1–12).
+- `day` — The day of the month (1–31).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.gallery(string)"></a>
+## Method: Gallery(string)
+Returns the gallery resource path: `/galleries/{gallery}`.
+
+**Parameters**
+- `gallery` — The imported gallery identifier.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.galleryphotos(string)"></a>
+## Method: GalleryPhotos(string)
+Returns the photos path for a gallery: `/galleries/{gallery}/photos`.
+
+**Parameters**
+- `gallery` — The imported gallery identifier.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.month(int,int)"></a>
+## Method: Month(int, int)
+Returns the self path for a month: `/years/{year}/months/{month}`.
+
+**Parameters**
+- `year` — The four-digit year.
+- `month` — The month number (1–12).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.monthdays(int,int)"></a>
+## Method: MonthDays(int, int)
+Returns the days path for a month: `/years/{year}/months/{month}/days`.
+
+**Parameters**
+- `year` — The four-digit year.
+- `month` — The month number (1–12).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.monthphotos(int,int)"></a>
+## Method: MonthPhotos(int, int)
+Returns the photos path for a month: `/years/{year}/months/{month}/photos`.
+
+**Parameters**
+- `year` — The four-digit year.
+- `month` — The month number (1–12).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.onthisday(int,int)"></a>
+## Method: OnThisDay(int, int)
+Returns the on-this-day query path: `/on-this-day?month={month}&day={day}`.
+
+**Parameters**
+- `month` — The month number (1–12).
+- `day` — The day of the month (1–31).
+
+<a id="photoarchive.core.models.resourcelinkbuilder.photos"></a>
+## Method: Photos
+Returns the path for the photos collection: `/photos`.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.photoself(string)"></a>
+## Method: PhotoSelf(string)
+Returns the self path for a single photo: `/photos/{slug}`.
+
+**Parameters**
+- `slug` — The URL-safe photo slug.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.photosquery(system.nullable[int],system.nullable[int],system.nullable[int],string,string,string)"></a>
+## Method: PhotosQuery(Nullable<int>, Nullable<int>, Nullable<int>, string, string, string)
+Returns the `/photos` query path with any supplied filter parameters appended. Only non-null/non-empty values are included in the query string.
+
+**Parameters**
+- `year` — Optional year filter.
+- `month` — Optional month filter (1–12).
+- `day` — Optional day filter (1–31).
+- `source` — Optional import source filter.
+- `gallery` — Optional gallery name filter.
+- `postId` — Optional blog post identifier filter.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.post(string)"></a>
+## Method: Post(string)
+Returns the self path for a post: `/posts/{postId}`.
+
+**Parameters**
+- `postId` — The blog post identifier.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.postphotos(string)"></a>
+## Method: PostPhotos(string)
+Returns the photos path for a post: `/posts/{postId}/photos`.
+
+**Parameters**
+- `postId` — The blog post identifier.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.year(int)"></a>
+## Method: Year(int)
+Returns the self path for a year: `/years/{year}`.
+
+**Parameters**
+- `year` — The four-digit year.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.yearmonths(int)"></a>
+## Method: YearMonths(int)
+Returns the months path for a year: `/years/{year}/months`.
+
+**Parameters**
+- `year` — The four-digit year.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.yearphotos(int)"></a>
+## Method: YearPhotos(int)
+Returns the photos path for a year: `/years/{year}/photos`.
+
+**Parameters**
+- `year` — The four-digit year.
+
+<a id="photoarchive.core.models.resourcelinkbuilder.years"></a>
+## Method: Years
+Returns the path for the years index: `/years`.
+
+
+---
+
 <a id="yeardetailresponse"></a>
 # YearDetailResponse
 
@@ -486,6 +672,18 @@ Gets or sets the total number of photos taken during this year.
 <a id="photoarchive.core.models.yeardetailresponse.year"></a>
 ## Property: Year
 Gets or sets the year.
+
+
+---
+
+<a id="yearsresponse"></a>
+# YearsResponse
+
+The response returned by the archive index endpoint, listing all years that contain photos.
+
+<a id="photoarchive.core.models.yearsresponse.years"></a>
+## Property: Years
+Gets or sets the list of years that contain at least one photo.
 
 
 ---

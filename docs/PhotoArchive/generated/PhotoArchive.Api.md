@@ -41,7 +41,7 @@ Returns the days within a given year/month that contain photos, along with a pho
 
 **Returns**
 
-An object with `year`, `month`, `photoCount`, `links`, and a `days` array of [DaySummaryDto](#daysummarydto) items.
+A [DaysResponse](#daysresponse) with `year`, `month`, `photoCount`, `links`, and a `days` array of [DaySummaryDto](#daysummarydto) items.
 
 <a id="photoarchive.api.controllers.archivecontroller.getmonth(int,int)"></a>
 ## Method: GetMonth(int, int)
@@ -147,7 +147,7 @@ Initializes a new instance of [GalleriesController](#galleriescontroller).
 Returns a paged list of photos belonging to the specified gallery.
 
 **Parameters**
-- `gallery` — The gallery name.
+- `gallery` — The imported gallery identifier.
 - `page` — The 1-based page number. Defaults to 1.
 - `pageSize` — The number of results per page. Defaults to 50.
 
@@ -202,7 +202,7 @@ Initializes a new instance of [PhotosController](#photoscontroller).
 Returns the detail for a single photo identified by its slug.
 
 **Parameters**
-- `slug` — The unique slug of the photo.
+- `slug` — The URL-safe unique identifier of the photo.
 
 **Returns**
 
@@ -213,12 +213,12 @@ A [PhotoDetailResponse](#photodetailresponse), or 404 if not found.
 Returns a paged list of photos, optionally filtered by year, month, day, source, gallery, and/or post.
 
 **Parameters**
-- `year` — Optional year filter.
-- `month` — Optional month filter (1–12).
-- `day` — Optional day filter (1–31).
-- `source` — Optional import source filter (e.g., "legacy", "facebook").
-- `gallery` — Optional gallery name filter.
-- `postId` — Optional blog post identifier filter.
+- `year` — Filter by the year the photo was taken.
+- `month` — Filter by the month the photo was taken (1–12).
+- `day` — Filter by the day the photo was taken (1–31).
+- `source` — Filter by import source identifier (e.g., "instagram", "facebook", "manual").
+- `gallery` — Filter by imported gallery identifier.
+- `postId` — Filter by associated legacy blog post identifier.
 - `page` — The 1-based page number. Defaults to 1.
 - `pageSize` — The number of results per page. Defaults to 50.
 
@@ -271,5 +271,5 @@ A [PostSummaryResponse](#postsummaryresponse), or 404 if no photos are associate
 <a id="program"></a>
 # Program
 
-Auto-generated public partial Program class for top-level statement apps.
+Exposes the top-level Program class so that integration tests can reference it via WebApplicationFactory.
 
