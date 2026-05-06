@@ -9,6 +9,7 @@
 - [OnThisDayResponse](#onthisdayresponse)
 - [OnThisDayYearGroup](#onthisdayyeargroup)
 - [PagedResponse<T1>](#pagedresponset1)
+- [PaginationLinkBuilder](#paginationlinkbuilder)
 - [PhotoDetailResponse](#photodetailresponse)
 - [PhotoDto](#photodto)
 - [PhotoQueryOptions](#photoqueryoptions)
@@ -299,6 +300,28 @@ Gets or sets the total number of matching items across all pages.
 <a id="photoarchive.core.models.pagedresponse`1.totalpages"></a>
 ## Property: TotalPages
 Gets or sets the total number of pages available.
+
+
+---
+
+<a id="paginationlinkbuilder"></a>
+# PaginationLinkBuilder
+
+Builds hypermedia pagination links for paged collection responses. Accepts a base path that already contains any active filter query parameters (but not `page` or `pageSize`) and produces the standard self/first/previous/next/last link dictionary expected by [PagedResponse<T1>](#pagedresponset1).
+
+<a id="photoarchive.core.models.paginationlinkbuilder.build(string,int,int,int)"></a>
+## Method: Build(string, int, int, int)
+Builds the standard pagination link dictionary for a paged collection.
+
+**Parameters**
+- `basePath` — The canonical base path including any active filter query parameters, but excluding `page` and `pageSize`. Examples: `/photos`, `/photos?source=instagram`, `/years/2022/photos`.
+- `page` — The current 1-based page number.
+- `pageSize` — The number of items per page.
+- `totalPages` — The total number of pages available.
+
+**Returns**
+
+A dictionary of named [ApiLink](#apilink) entries. Always contains `self` and `first`. Contains `previous` when `page` > 1. Contains `next` when `page` < `totalPages`. Contains `last` when `totalPages` > 0.
 
 
 ---
