@@ -11,6 +11,7 @@
 - [PagedResponse<T1>](#pagedresponset1)
 - [PhotoDetailResponse](#photodetailresponse)
 - [PhotoDto](#photodto)
+- [PhotoQueryOptions](#photoqueryoptions)
 - [PostSummaryResponse](#postsummaryresponse)
 - [YearDetailResponse](#yeardetailresponse)
 - [YearSummaryDto](#yearsummarydto)
@@ -374,6 +375,46 @@ Gets or sets the optional display title of the photo.
 <a id="photoarchive.core.models.photodto.year"></a>
 ## Property: Year
 Gets or sets the year the photo was taken.
+
+
+---
+
+<a id="photoqueryoptions"></a>
+# PhotoQueryOptions
+
+Represents the filter and pagination options used to query photo collections. All photo collection endpoints share this query model to ensure consistent filtering behavior.
+
+<a id="photoarchive.core.models.photoqueryoptions.day"></a>
+## Property: Day
+Gets or sets the optional day filter (1–31).
+
+<a id="photoarchive.core.models.photoqueryoptions.gallery"></a>
+## Property: Gallery
+Gets or sets the optional gallery name filter.
+
+<a id="photoarchive.core.models.photoqueryoptions.month"></a>
+## Property: Month
+Gets or sets the optional month filter (1–12).
+
+<a id="photoarchive.core.models.photoqueryoptions.page"></a>
+## Property: Page
+Gets or sets the 1-based page number. Defaults to 1.
+
+<a id="photoarchive.core.models.photoqueryoptions.pagesize"></a>
+## Property: PageSize
+Gets or sets the maximum number of results per page. Defaults to 50.
+
+<a id="photoarchive.core.models.photoqueryoptions.postid"></a>
+## Property: PostId
+Gets or sets the optional blog post identifier filter.
+
+<a id="photoarchive.core.models.photoqueryoptions.source"></a>
+## Property: Source
+Gets or sets the optional import source filter (e.g., "legacy", "facebook").
+
+<a id="photoarchive.core.models.photoqueryoptions.year"></a>
+## Property: Year
+Gets or sets the optional year filter.
 
 
 ---
