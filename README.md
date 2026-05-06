@@ -15,7 +15,7 @@ The project currently provides:
 
 ---
 
-# Project Status
+## Project Status
 
 ## API Version
 
@@ -32,12 +32,12 @@ The API now includes:
 
 ---
 
-# Architecture Overview
+## Architecture Overview
 
 PhotoArchive is organized into several projects:
 
 | Project | Purpose |
-|---|---|
+| --- | --- |
 | `PhotoArchive.Api` | ASP.NET Core REST API |
 | `PhotoArchive.Core` | Shared models, DTOs, link generation |
 | `PhotoArchive.Data` | EF Core data access and services |
@@ -53,7 +53,7 @@ Additional documentation lives under:
 
 ---
 
-# Current Features
+## Current Features
 
 ## Archive Navigation
 
@@ -66,7 +66,7 @@ Browse photos by archive hierarchy:
 /years/{year}/months/{month}/days/{day}
 ```
 
-## Photo Browsing
+### Photo Browsing
 
 ```text
 /photos
@@ -90,7 +90,7 @@ Example:
 
 ---
 
-## Posts
+### Posts
 
 ```text
 /posts/{postId}
@@ -99,7 +99,7 @@ Example:
 
 ---
 
-## Galleries
+### Galleries
 
 ```text
 /galleries/{gallery}/photos
@@ -107,7 +107,7 @@ Example:
 
 ---
 
-## On This Day
+### On This Day
 
 ```text
 /on-this-day
@@ -116,7 +116,7 @@ Example:
 
 ---
 
-# Pagination
+## Pagination
 
 Photo collection endpoints use a shared paged response format:
 
@@ -141,7 +141,7 @@ Pagination links preserve active filters.
 
 ---
 
-# Data Model
+## Data Model
 
 Each imported photo currently includes:
 
@@ -160,17 +160,17 @@ Each imported photo currently includes:
 
 ---
 
-# Import Pipeline
+## Import Pipeline
 
 PhotoArchive currently imports legacy Jekyll `_gallery` markdown content.
 
-## Dry Run
+### Dry Run
 
 ```bash
 dotnet run --project src/PhotoArchive.Tools -- import-jekyll-gallery "<path>" --dry-run
 ```
 
-## Import
+### Import
 
 ```bash
 dotnet run --project src/PhotoArchive.Tools -- import-jekyll-gallery "<path>"
@@ -180,49 +180,13 @@ The importer is idempotent and safe to re-run.
 
 ---
 
-# Development
+## Development
 
-## Requirements
-
-- .NET 10 SDK
-- PostgreSQL
-- Docker (recommended)
+See the [setup](docs/PhotoArchive/setup/README.md) documentatoin in the docs folder
 
 ---
 
-## Build
-
-```bash
-dotnet clean
-dotnet restore
-dotnet build
-```
-
----
-
-## Run Tests
-
-```bash
-dotnet test
-```
-
----
-
-## Run API
-
-```bash
-dotnet run --project src/PhotoArchive.Api
-```
-
-Swagger:
-
-```text
-http://localhost:5296/swagger
-```
-
----
-
-# Documentation
+## Documentation
 
 ## Architecture & Project Docs
 
@@ -242,7 +206,7 @@ Regenerate locally:
 
 ---
 
-# CI/CD
+## CI/CD
 
 The repository includes workflows for:
 
@@ -253,7 +217,7 @@ The repository includes workflows for:
 
 ---
 
-# Testing
+## Testing
 
 The repository includes integration tests covering:
 
@@ -268,7 +232,7 @@ The repository includes integration tests covering:
 
 ---
 
-# Design Principles
+## Design Principles
 
 PhotoArchive is intentionally:
 
@@ -288,16 +252,16 @@ The API is designed to support future:
 
 ---
 
-# Roadmap
+## Roadmap
 
-## Current Focus
+### Current Focus
 
 - API stabilization
 - frontend exploration
 - archive browsing UX
 - documentation quality
 
-## Future Exploration
+### Future Exploration
 
 - React frontend
 - authenticated management UI
@@ -310,13 +274,7 @@ The API is designed to support future:
 
 ---
 
-# License
-
-TBD
-
----
-
-# Repository Documentation
+## Repository Documentation
 
 See:
 
