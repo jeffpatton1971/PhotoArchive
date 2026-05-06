@@ -61,7 +61,7 @@ docker version
 Optional but useful for inspecting the database.
 
 ```powershell
-winget install PostgreSQL.PostgreSQL
+winget install PostgreSQL.PostgreSQL.16
 ```
 
 Or use a GUI like:
@@ -113,7 +113,22 @@ Start PostgreSQL using Docker/Docker Compose if configured in the repo.
 Typical command:
 
 ```powershell
-docker compose up -d
+docker run --name photoarchive-postgres `
+  -e POSTGRES_DB=photoarchive `
+  -e POSTGRES_USER=postgres `
+  -e POSTGRES_PASSWORD=postgres `
+  -p 5432:5432 `
+  -d postgres:16
+
+docker start photoarchive-postgres
+```
+
+This project stores secrets in the [Secret Manager](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/secure-net-microservices-web-applications/developer-app-secrets-storage) so this needs to be configured.
+
+```powershell
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=photoarchive;Username=postgres;Password=postgres" --project src/PhotoArchive.Api
+
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=photoarchive;Username=postgres;Password=postgres" --project src/PhotoArchive.Tools
 ```
 
 Then apply EF migrations:
