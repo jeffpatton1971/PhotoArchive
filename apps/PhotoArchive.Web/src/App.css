@@ -73,3 +73,8 @@
 .year-card a {
   color: #0645ad;
 }
+
+.page-content {
+  flex: 1;
+  padding: 2rem;
+}
