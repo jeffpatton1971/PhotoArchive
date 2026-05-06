@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using PhotoArchive.Data;
 using PhotoArchive.Core.Entities;
 using PhotoArchive.Data.Services;
@@ -10,7 +11,26 @@ builder.Services.AddDbContext<PhotoDbContext>(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "PhotoArchive API",
+        Version = "v1",
+        Description = "API for browsing and querying the personal photo archive. " +
+                      "Supports archive navigation by year/month/day, photo collection queries, " +
+                      "gallery browsing, blog post association, and the 'On This Day' feature."
+    });
+
+    // Include XML comments from the API and Core assemblies.
+    var apiXml = Path.Combine(AppContext.BaseDirectory, "PhotoArchive.Api.xml");
+    if (File.Exists(apiXml))
+        options.IncludeXmlComments(apiXml);
+
+    var coreXml = Path.Combine(AppContext.BaseDirectory, "PhotoArchive.Core.xml");
+    if (File.Exists(coreXml))
+        options.IncludeXmlComments(coreXml);
+});
 
 builder.Services.AddScoped<PhotoService>();
 

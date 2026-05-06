@@ -8,6 +8,8 @@ namespace PhotoArchive.Api.Controllers;
 /// Provides the "On This Day" endpoint, which returns photos grouped by year for a given month and day.
 /// </summary>
 [ApiController]
+[Produces("application/json")]
+[Tags("OnThisDay")]
 public class OnThisDayController : ControllerBase
 {
     private readonly PhotoService _photoService;
@@ -28,6 +30,8 @@ public class OnThisDayController : ControllerBase
     /// <param name="day">Optional day override (1–31). Defaults to the current UTC day.</param>
     /// <returns>An <see cref="OnThisDayResponse"/> grouped by year.</returns>
     [HttpGet("/on-this-day")]
+    [ProducesResponseType(typeof(OnThisDayResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetOnThisDay([FromQuery] int? month, [FromQuery] int? day)
     {
         var targetDate = DateTime.UtcNow;

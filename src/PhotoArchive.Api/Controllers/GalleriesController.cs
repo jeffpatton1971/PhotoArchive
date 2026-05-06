@@ -9,6 +9,8 @@ namespace PhotoArchive.Api.Controllers;
 /// Gallery identity is derived from imported metadata; no first-class Gallery entity exists yet.
 /// </summary>
 [ApiController]
+[Produces("application/json")]
+[Tags("Galleries")]
 public class GalleriesController : ControllerBase
 {
     private readonly PhotoService _photoService;
@@ -25,11 +27,12 @@ public class GalleriesController : ControllerBase
     /// <summary>
     /// Returns a paged list of photos belonging to the specified gallery.
     /// </summary>
-    /// <param name="gallery">The gallery name.</param>
+    /// <param name="gallery">The imported gallery identifier.</param>
     /// <param name="page">The 1-based page number. Defaults to 1.</param>
     /// <param name="pageSize">The number of results per page. Defaults to 50.</param>
     /// <returns>A <see cref="PagedResponse{T}"/> of <see cref="PhotoDto"/> items in the gallery.</returns>
     [HttpGet("/galleries/{gallery}/photos")]
+    [ProducesResponseType(typeof(PagedResponse<PhotoDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetGalleryPhotos(string gallery, [FromQuery] int page = 1, [FromQuery] int pageSize = 50)
     {
         var photos = await _photoService.GetByGalleryAsync(gallery, page, pageSize);
