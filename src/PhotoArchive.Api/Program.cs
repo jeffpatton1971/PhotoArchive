@@ -9,6 +9,17 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<PhotoDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PhotoArchiveWebDev", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -38,6 +49,8 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
+
+app.UseCors("PhotoArchiveWebDev");
 
 app.MapControllers();
 
