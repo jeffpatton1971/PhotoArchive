@@ -259,7 +259,7 @@ majority of what the v1 frontend requires.
 Work through these steps in order. Each step produces something visible and testable before
 moving on.
 
-1. **Create the Vite React app** — `npm create vite@latest PhotoArchive.Web -- --template react-ts`
+1. **Create the Vite React app** — `npm create vite@latest apps/PhotoArchive.Web -- --template react-ts`
 2. **Render a static layout** — add a header, navigation placeholder, and footer with hardcoded text
 3. **Create a hardcoded YearCard** — build the component with fixed data to get the shape right
 4. **Fetch `/years`** — replace the hardcoded data with a real API call in a `useEffect`
