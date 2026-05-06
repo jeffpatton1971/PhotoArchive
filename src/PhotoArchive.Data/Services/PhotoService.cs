@@ -21,34 +21,6 @@ public class PhotoService
         _db = db;
     }
 
-    private static string BuildPhotoPath(int? year, int? month, int? day, string? source = null, string? gallery = null, string? postId = null)
-    {
-        var parameters = new List<string>();
-
-        if (year.HasValue)
-            parameters.Add($"year={year.Value}");
-
-        if (month.HasValue)
-            parameters.Add($"month={month.Value}");
-
-        if (day.HasValue)
-            parameters.Add($"day={day.Value}");
-
-        if (!string.IsNullOrWhiteSpace(source))
-            parameters.Add($"source={Uri.EscapeDataString(source)}");
-
-        if (!string.IsNullOrWhiteSpace(gallery))
-            parameters.Add($"gallery={Uri.EscapeDataString(gallery)}");
-
-        if (!string.IsNullOrWhiteSpace(postId))
-            parameters.Add($"postId={Uri.EscapeDataString(postId)}");
-
-        if (parameters.Count == 0)
-            return "/photos";
-
-        return "/photos?" + string.Join("&", parameters);
-    }
-
     /// <summary>
     /// Builds an <see cref="IQueryable{T}"/> of <see cref="Photo"/> records filtered by the supplied
     /// <paramref name="options"/>. All photo collection queries are routed through this method to ensure
@@ -174,7 +146,7 @@ public class PhotoService
             PageSize = pageSize
         };
 
-        return GetPhotosByQueryAsync(options, BuildPhotoPath(year, month, day, source, gallery, postId));
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.PhotosQuery(year, month, day, source, gallery, postId));
     }
 
     /// <summary>
@@ -191,19 +163,19 @@ public class PhotoService
 
         var links = new Dictionary<string, ApiLink>
         {
-            ["self"] = new() { Href = $"/photos/{photo.Slug}" }
+            ["self"] = new() { Href = ResourceLinkBuilder.PhotoSelf(photo.Slug) }
         };
 
         if (photo.Year.HasValue && photo.Month.HasValue && photo.Day.HasValue)
         {
             links["sameDate"] = new()
             {
-                Href = $"/photos?year={photo.Year}&month={photo.Month}&day={photo.Day}"
+                Href = ResourceLinkBuilder.PhotosQuery(photo.Year, photo.Month, photo.Day)
             };
 
             links["onThisDay"] = new()
             {
-                Href = $"/on-this-day?month={photo.Month}&day={photo.Day}"
+                Href = ResourceLinkBuilder.OnThisDay(photo.Month.Value, photo.Day.Value)
             };
         }
 
@@ -211,12 +183,12 @@ public class PhotoService
         {
             links["gallery"] = new()
             {
-                Href = $"/galleries/{Uri.EscapeDataString(photo.Gallery)}"
+                Href = ResourceLinkBuilder.Gallery(photo.Gallery)
             };
 
             links["galleryPhotos"] = new()
             {
-                Href = $"/galleries/{Uri.EscapeDataString(photo.Gallery)}/photos"
+                Href = ResourceLinkBuilder.GalleryPhotos(photo.Gallery)
             };
         }
 
@@ -224,12 +196,12 @@ public class PhotoService
         {
             links["post"] = new()
             {
-                Href = $"/posts/{Uri.EscapeDataString(photo.PostId)}"
+                Href = ResourceLinkBuilder.Post(photo.PostId)
             };
 
             links["postPhotos"] = new()
             {
-                Href = $"/posts/{Uri.EscapeDataString(photo.PostId)}/photos"
+                Href = ResourceLinkBuilder.PostPhotos(photo.PostId)
             };
         }
 
@@ -264,14 +236,8 @@ public class PhotoService
             PhotoCount = photos.Count,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/posts/{Uri.EscapeDataString(postId)}"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/posts/{Uri.EscapeDataString(postId)}/photos"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Post(postId) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.PostPhotos(postId) }
             }
         };
     }
@@ -300,7 +266,7 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetByGalleryAsync(string gallery, int page = 1, int pageSize = 50)
     {
         var options = new PhotoQueryOptions { Gallery = gallery, Page = page, PageSize = pageSize };
-        return GetPhotosByQueryAsync(options, $"/galleries/{Uri.EscapeDataString(gallery)}/photos");
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.GalleryPhotos(gallery));
     }
 
     /// <summary>
@@ -314,7 +280,7 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetByPostAsync(string postId, int page = 1, int pageSize = 50)
     {
         var options = new PhotoQueryOptions { PostId = postId, Page = page, PageSize = pageSize };
-        return GetPhotosByQueryAsync(options, $"/posts/{Uri.EscapeDataString(postId)}/photos");
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.PostPhotos(postId));
     }
 
     /// <summary>
@@ -389,9 +355,9 @@ public class PhotoService
             PhotoCount = x.PhotoCount,
             Links = new Dictionary<string, ApiLink>
             {
-                ["months"] = new() { Href = $"/years/{x.Year}/months" },
-                ["photos"] = new() { Href = $"/years/{x.Year}/photos" },
-                ["query"] = new() { Href = $"/photos?year={x.Year}" }
+                ["months"] = new() { Href = ResourceLinkBuilder.YearMonths(x.Year) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.YearPhotos(x.Year) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: x.Year) }
             }
         }).ToList();
     }
@@ -415,22 +381,10 @@ public class PhotoService
             Months = months,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/years/{year}"
-                },
-                ["months"] = new()
-                {
-                    Href = $"/years/{year}/months"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/years/{year}/photos"
-                },
-                ["query"] = new()
-                {
-                    Href = $"/photos?year={year}"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Year(year) },
+                ["months"] = new() { Href = ResourceLinkBuilder.YearMonths(year) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.YearPhotos(year) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year) }
             }
         };
     }
@@ -460,22 +414,10 @@ public class PhotoService
             PhotoCount = x.PhotoCount,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/years/{year}/months/{x.Month}"
-                },
-                ["days"] = new()
-                {
-                    Href = $"/years/{year}/months/{x.Month}/days"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/years/{year}/months/{x.Month}/photos"
-                },
-                ["query"] = new()
-                {
-                    Href = $"/photos?year={year}&month={x.Month}"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Month(year, x.Month) },
+                ["days"] = new() { Href = ResourceLinkBuilder.MonthDays(year, x.Month) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.MonthPhotos(year, x.Month) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year, month: x.Month) }
             }
         }).ToList();
     }
@@ -501,22 +443,10 @@ public class PhotoService
             Days = days,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}"
-                },
-                ["days"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/days"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/photos"
-                },
-                ["query"] = new()
-                {
-                    Href = $"/photos?year={year}&month={month}"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Month(year, month) },
+                ["days"] = new() { Href = ResourceLinkBuilder.MonthDays(year, month) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.MonthPhotos(year, month) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year, month: month) }
             }
         };
     }
@@ -547,22 +477,10 @@ public class PhotoService
             PhotoCount = x.PhotoCount,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/days/{x.Day}"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/days/{x.Day}/photos"
-                },
-                ["query"] = new()
-                {
-                    Href = $"/photos?year={year}&month={month}&day={x.Day}"
-                },
-                ["onThisDay"] = new()
-                {
-                    Href = $"/on-this-day?month={month}&day={x.Day}"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Day(year, month, x.Day) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.DayPhotos(year, month, x.Day) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year, month: month, day: x.Day) },
+                ["onThisDay"] = new() { Href = ResourceLinkBuilder.OnThisDay(month, x.Day) }
             }
         }).ToList();
     }
@@ -593,22 +511,10 @@ public class PhotoService
             PhotoCount = photoCount,
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/days/{day}"
-                },
-                ["photos"] = new()
-                {
-                    Href = $"/years/{year}/months/{month}/days/{day}/photos"
-                },
-                ["query"] = new()
-                {
-                    Href = $"/photos?year={year}&month={month}&day={day}"
-                },
-                ["onThisDay"] = new()
-                {
-                    Href = $"/on-this-day?month={month}&day={day}"
-                }
+                ["self"] = new() { Href = ResourceLinkBuilder.Day(year, month, day) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.DayPhotos(year, month, day) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year, month: month, day: day) },
+                ["onThisDay"] = new() { Href = ResourceLinkBuilder.OnThisDay(month, day) }
             }
         };
     }
@@ -641,7 +547,7 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetPhotosByYearAsync(int year, int page, int pageSize)
     {
         var options = new PhotoQueryOptions { Year = year, Page = page, PageSize = pageSize };
-        return GetPhotosByQueryAsync(options, $"/years/{year}/photos");
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.YearPhotos(year));
     }
 
     /// <summary>
@@ -656,7 +562,7 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetPhotosByMonthAsync(int year, int month, int page, int pageSize)
     {
         var options = new PhotoQueryOptions { Year = year, Month = month, Page = page, PageSize = pageSize };
-        return GetPhotosByQueryAsync(options, $"/years/{year}/months/{month}/photos");
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.MonthPhotos(year, month));
     }
 
     /// <summary>
@@ -672,6 +578,6 @@ public class PhotoService
     public Task<PagedResponse<PhotoDto>> GetPhotosByDayAsync(int year, int month, int day, int page, int pageSize)
     {
         var options = new PhotoQueryOptions { Year = year, Month = month, Day = day, Page = page, PageSize = pageSize };
-        return GetPhotosByQueryAsync(options, $"/years/{year}/months/{month}/days/{day}/photos");
+        return GetPhotosByQueryAsync(options, ResourceLinkBuilder.DayPhotos(year, month, day));
     }
 }

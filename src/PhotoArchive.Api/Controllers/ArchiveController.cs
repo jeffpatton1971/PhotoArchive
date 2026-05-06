@@ -146,9 +146,9 @@ public class ArchiveController : ControllerBase
             PhotoCount = days.Sum(d => d.PhotoCount),
             Links = new Dictionary<string, ApiLink>
             {
-                ["self"] = new() { Href = $"/years/{year}/months/{month}/days" },
-                ["photos"] = new() { Href = $"/years/{year}/months/{month}/photos" },
-                ["query"] = new() { Href = $"/photos?year={year}&month={month}" }
+                ["self"] = new() { Href = ResourceLinkBuilder.MonthDays(year, month) },
+                ["photos"] = new() { Href = ResourceLinkBuilder.MonthPhotos(year, month) },
+                ["query"] = new() { Href = ResourceLinkBuilder.PhotosQuery(year: year, month: month) }
             },
             Days = days
         });
