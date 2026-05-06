@@ -21,7 +21,7 @@ public class PhotoService
         _db = db;
     }
 
-    private static string BuildPhotoPath(int? year, int? month, int? day)
+    private static string BuildPhotoPath(int? year, int? month, int? day, string? source = null, string? gallery = null, string? postId = null)
     {
         var parameters = new List<string>();
 
@@ -33,6 +33,15 @@ public class PhotoService
 
         if (day.HasValue)
             parameters.Add($"day={day.Value}");
+
+        if (!string.IsNullOrWhiteSpace(source))
+            parameters.Add($"source={Uri.EscapeDataString(source)}");
+
+        if (!string.IsNullOrWhiteSpace(gallery))
+            parameters.Add($"gallery={Uri.EscapeDataString(gallery)}");
+
+        if (!string.IsNullOrWhiteSpace(postId))
+            parameters.Add($"postId={Uri.EscapeDataString(postId)}");
 
         if (parameters.Count == 0)
             return "/photos";
@@ -93,12 +102,6 @@ public class PhotoService
         return GetPagedPhotosAsync(query, path, options.Page, options.PageSize, useAuthoredOrder);
     }
 
-    private static string BuildPagedHref(string path, int page, int pageSize)
-    {
-        var separator = path.Contains('?') ? '&' : '?';
-        return $"{path}{separator}page={page}&pageSize={pageSize}";
-    }
-
     private async Task<PagedResponse<PhotoDto>> GetPagedPhotosAsync(
         IQueryable<Photo> query,
         string path,
@@ -123,20 +126,7 @@ public class PhotoService
             .Take(pageSize)
             .ToListAsync();
 
-        var links = new Dictionary<string, ApiLink>
-        {
-            ["self"] = new() { Href = BuildPagedHref(path, page, pageSize) },
-            ["first"] = new() { Href = BuildPagedHref(path, 1, pageSize) }
-        };
-
-        if (page > 1)
-            links["previous"] = new() { Href = BuildPagedHref(path, page - 1, pageSize) };
-
-        if (page < totalPages)
-            links["next"] = new() { Href = BuildPagedHref(path, page + 1, pageSize) };
-
-        if (totalPages > 0)
-            links["last"] = new() { Href = BuildPagedHref(path, totalPages, pageSize) };
+        var links = PaginationLinkBuilder.Build(path, page, pageSize, totalPages);
 
         return new PagedResponse<PhotoDto>
         {
@@ -184,7 +174,7 @@ public class PhotoService
             PageSize = pageSize
         };
 
-        return GetPhotosByQueryAsync(options, BuildPhotoPath(year, month, day));
+        return GetPhotosByQueryAsync(options, BuildPhotoPath(year, month, day, source, gallery, postId));
     }
 
     /// <summary>
