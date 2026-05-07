@@ -100,9 +100,6 @@ function PhotoDetailPage() {
           { label: photo.title },
         ]}
       />
-      <Link to={`/archive/${photo.year}/${photo.month}/${photo.day}`}>
-        Back to {photo.month}/{photo.day}/{photo.year}
-      </Link>
 
       <h2>{photo.title}</h2>
 
