@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import OnThisDayPage from './pages/OnThisDayPage';
 import YearPage from './pages/YearPage';
 import MonthPage from './pages/MonthPage';
+import DayPage from './pages/DayPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/archive/:year" element={<YearPage />} />
         <Route path="/on-this-day" element={<OnThisDayPage />} />
         <Route path="/archive/:year/:month" element={<MonthPage />} />
+        <Route path="/archive/:year/:month/:day" element={<DayPage />} />
       </Routes>
 
       <footer className="site-footer">

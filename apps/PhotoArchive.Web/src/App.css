@@ -120,3 +120,35 @@
 .day-card a {
   color: #0645ad;
 }
+
+.photo-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.photo-card {
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+.photo-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.photo-card h3 {
+  margin: 0;
+  padding: 0.75rem 0.75rem 0.25rem;
+  font-size: 1rem;
+}
+
+.photo-card p {
+  margin: 0;
+  padding: 0 0.75rem 0.75rem;
+  color: #666;
+}
