@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getMonth, type MonthDetailResponse } from '../api/photoArchiveApi';
 import DayCard from '../components/DayCard';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 const monthNames = [
   'January',
@@ -87,6 +88,13 @@ function MonthPage() {
 
   return (
     <section className="page-content">
+      <Breadcrumbs
+        items={[
+          { label: 'Archive', to: '/archive' },
+          { label: String(monthDetail.year), to: `/archive/${monthDetail.year}` },
+          { label: monthName },
+        ]}
+      />
       <h2>
         {monthName} {monthDetail.year}
       </h2>

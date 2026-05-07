@@ -6,6 +6,7 @@ import {
     type PhotoSummary,
 } from '../api/photoArchiveApi';
 import PhotoGrid from '../components/PhotoGrid';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 function DayPage() {
     const { year, month, day } = useParams<{
@@ -23,6 +24,21 @@ function DayPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const monthNames = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+    ];
 
     useEffect(() => {
         if (
@@ -103,6 +119,17 @@ function DayPage() {
 
     return (
         <section className="page-content">
+            <Breadcrumbs
+                items={[
+                    { label: 'Archive', to: '/archive' },
+                    { label: String(yearNumber), to: `/archive/${yearNumber}` },
+                    {
+                        label: monthNames[monthNumber - 1] ?? `Month ${monthNumber}`,
+                        to: `/archive/${yearNumber}/${monthNumber}`,
+                    },
+                    { label: String(dayNumber) },
+                ]}
+            />
             <h2>
                 {monthNumber}/{dayNumber}/{yearNumber}
             </h2>

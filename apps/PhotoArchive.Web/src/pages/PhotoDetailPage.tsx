@@ -4,6 +4,7 @@ import {
   getPhoto,
   type PhotoDetailResponse,
 } from '../api/photoArchiveApi';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 function PhotoDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -12,6 +13,20 @@ function PhotoDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
   useEffect(() => {
     if (!slug) {
       setIsLoading(false);
@@ -70,6 +85,21 @@ function PhotoDetailPage() {
 
   return (
     <section className="page-content photo-detail-page">
+      <Breadcrumbs
+        items={[
+          { label: 'Archive', to: '/archive' },
+          { label: String(photo.year), to: `/archive/${photo.year}` },
+          {
+            label: monthNames[photo.month - 1] ?? `Month ${photo.month}`,
+            to: `/archive/${photo.year}/${photo.month}`,
+          },
+          {
+            label: String(photo.day),
+            to: `/archive/${photo.year}/${photo.month}/${photo.day}`,
+          },
+          { label: photo.title },
+        ]}
+      />
       <Link to={`/archive/${photo.year}/${photo.month}/${photo.day}`}>
         Back to {photo.month}/{photo.day}/{photo.year}
       </Link>

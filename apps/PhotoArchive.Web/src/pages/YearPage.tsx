@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getYear, type YearDetailResponse } from '../api/photoArchiveApi';
 import MonthCard from '../components/MonthCard';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 function YearPage() {
   const { year } = useParams<{ year: string }>();
@@ -63,6 +64,12 @@ function YearPage() {
 
   return (
     <section className="page-content">
+      <Breadcrumbs
+        items={[
+          { label: 'Archive', to: '/archive' },
+          { label: String(yearDetail.year) },
+        ]}
+      />
       <h2>{yearDetail.year}</h2>
       <p>{yearDetail.photoCount} photos</p>
 
