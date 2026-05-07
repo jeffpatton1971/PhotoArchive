@@ -63,6 +63,11 @@ export type PagedResponse<T> = {
   links: Record<string, ApiLink>;
 };
 
+export type PhotoDetailResponse = {
+  photo: PhotoSummary;
+  links: Record<string, ApiLink>;
+};
+
 const apiBaseUrl = 'http://localhost:5296';
 
 export async function getYears(): Promise<YearsResponse> {
@@ -114,6 +119,18 @@ export async function getDayPhotos(
   if (!response.ok) {
     throw new Error(
       `Failed to load photos for ${year}-${month}-${day}. API returned ${response.status}.`,
+    );
+  }
+
+  return response.json();
+}
+
+export async function getPhoto(slug: string): Promise<PhotoDetailResponse> {
+  const response = await fetch(`${apiBaseUrl}/photos/${slug}`);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load photo ${slug}. API returned ${response.status}.`,
     );
   }
 
