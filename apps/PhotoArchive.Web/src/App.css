@@ -99,3 +99,24 @@
 .month-card a {
   color: #0645ad;
 }
+
+.day-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.day-card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+}
+
+.day-card h3 {
+  margin-top: 0;
+  font-size: 1.4rem;
+}
+
+.day-card a {
+  color: #0645ad;
+}

@@ -1,10 +1,17 @@
+
+export type YearsResponse = {
+  years: YearSummary[];
+};
+
 export type YearSummary = {
   year: number;
   photoCount: number;
 };
 
-export type YearsResponse = {
-  years: YearSummary[];
+export type YearDetailResponse = {
+  year: number;
+  photoCount: number;
+  months: MonthSummary[];
 };
 
 export type MonthSummary = {
@@ -13,10 +20,18 @@ export type MonthSummary = {
   photoCount: number;
 };
 
-export type YearDetailResponse = {
+export type MonthDetailResponse = {
   year: number;
+  month: number;
   photoCount: number;
-  months: MonthSummary[];
+  days: DaySummary[];
+};
+
+export type DaySummary = {
+  year: number;
+  month: number;
+  day: number;
+  photoCount: number;
 };
 
 const apiBaseUrl = 'http://localhost:5296';
@@ -36,6 +51,21 @@ export async function getYear(year: number): Promise<YearDetailResponse> {
 
   if (!response.ok) {
     throw new Error(`Failed to load year ${year}. API returned ${response.status}.`);
+  }
+
+  return response.json();
+}
+
+export async function getMonth(
+  year: number,
+  month: number,
+): Promise<MonthDetailResponse> {
+  const response = await fetch(`${apiBaseUrl}/years/${year}/months/${month}`);
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load month ${year}-${month}. API returned ${response.status}.`,
+    );
   }
 
   return response.json();
